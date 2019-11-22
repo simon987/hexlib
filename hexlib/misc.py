@@ -1,5 +1,7 @@
 import time
 
+import siphash
+
 last_time_called = dict()
 
 
@@ -22,3 +24,13 @@ def rate_limit(per_second):
 
     return decorate
 
+
+Key = b"0123456789ABCDEF"
+
+
+def strhash(str):
+    return siphash.SipHash24(Key, str.encode()).hash()
+
+
+def signed64(i):
+    return -(i & 0x8000000000000000) | (i & 0x7fffffffffffffff)
