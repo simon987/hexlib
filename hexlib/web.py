@@ -13,11 +13,11 @@ def cookie_from_string(text: str, domain: str) -> Cookie:
     expires = None
 
     for tok in tokens[1:]:
-        name, value = tok.split("=")
-        if name == "path":
-            path = value
-        if name == "expires":
-            expires = parse(value).timestamp()
+        k, v = tok.split("=")
+        if k == "path":
+            path = v
+        if k == "expires":
+            expires = parse(v).timestamp()
 
     return Cookie(
         version=0,
