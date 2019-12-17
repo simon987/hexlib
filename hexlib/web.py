@@ -20,7 +20,7 @@ def cookie_from_string(text: str, domain: str) -> Cookie:
             expires = parse(value).timestamp()
 
     return Cookie(
-        version=None,
+        version=0,
         name=name, value=value,
         port=None, port_specified=False,
         domain=domain, domain_specified=True, domain_initial_dot=False,
