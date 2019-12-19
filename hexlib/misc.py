@@ -33,7 +33,7 @@ def buffered(batch_size: int, flush_on_exit: bool = False):
         if flush_on_exit:
             atexit.register(func, buffer)
 
-        def wrapper(*items):
+        def wrapper(items):
 
             for item in items:
                 buffer.append(item)
