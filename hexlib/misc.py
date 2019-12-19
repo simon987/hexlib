@@ -1,5 +1,6 @@
 import time
 
+import atexit
 import siphash
 
 last_time_called = dict()
@@ -19,6 +20,27 @@ def rate_limit(per_second):
 
             last_time_called[func] = time.perf_counter()
             return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorate
+
+
+def buffered(batch_size: int, flush_on_exit: bool = False):
+
+    def decorate(func):
+        buffer = []
+        if flush_on_exit:
+            atexit.register(func, buffer)
+
+        def wrapper(*items):
+
+            for item in items:
+                buffer.append(item)
+
+                if len(buffer) >= batch_size:
+                    func(buffer)
+                    buffer.clear()
 
         return wrapper
 
