@@ -2,6 +2,7 @@ import time
 
 import atexit
 import siphash
+from threading import Lock
 
 last_time_called = dict()
 
@@ -30,17 +31,18 @@ def buffered(batch_size: int, flush_on_exit: bool = False):
 
     def decorate(func):
         buffer = []
+        lock = Lock()
         if flush_on_exit:
             atexit.register(func, buffer)
 
         def wrapper(items):
+            with lock:
+                for item in items:
+                    buffer.append(item)
 
-            for item in items:
-                buffer.append(item)
-
-                if len(buffer) >= batch_size:
-                    func(buffer)
-                    buffer.clear()
+                    if len(buffer) >= batch_size:
+                        func(buffer)
+                        buffer.clear()
 
         return wrapper
 
