@@ -44,22 +44,24 @@ class Table:
             conn.row_factory = sqlite3.Row
 
             sql = "INSERT INTO %s (id,%s) VALUES ('%s',%s)" % \
-                  (self._table, ",".join(value.keys()), key, ",".join(_sqlite_value(v) for v in value.values()))
-
+                  (self._table, ",".join(value.keys()), key, ",".join("?" for _ in value.values()))
             try:
-                conn.execute(sql)
+                conn.execute(sql, list(_sqlite_value(v) for v in value.values()))
             except sqlite3.OperationalError:
                 conn.execute(
                     "create table if not exists %s (id text primary key,%s)" %
                     (self._table, ",".join("%s %s" % (k, _sqlite_type(v)) for k, v in value.items()))
                 )
-                conn.execute(sql)
+                conn.execute(sql, list(_sqlite_value(v) for v in value.values()))
 
             except sqlite3.IntegrityError:
+                sql = "UPDATE %s SET (%s) = (%s) WHERE id=?" \
+                      % (self._table, ",".join(value.keys()), ",".join("?" for _ in value.values()))
+                args = [key]
+                args.extend(_sqlite_value(v) for v in value.values())
                 conn.execute(
-                    "UPDATE %s SET (%s) = (%s) WHERE id=?" %
-                    (self._table, ",".join(value.keys()), ",".join(_sqlite_value(v) for v in value.values())),
-                    (key,)
+                    sql,
+                    args
                 )
 
 
@@ -74,8 +76,6 @@ def _sqlite_type(value):
 
 
 def _sqlite_value(value):
-    if isinstance(value, str):
-        return '"%s"' % value
     if isinstance(value, bytes):
         return _sqlite_value(value.decode("unicode_escape"))
     return str(value)
