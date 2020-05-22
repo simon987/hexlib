@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name="hexlib",
-    version="1.7",
+    version="1.8",
     description="Misc utility methods",
     author="simon987",
     author_email="me@simon987.net",
     packages=["hexlib"],
     install_requires=[
-        "ImageHash", "influxdb", "siphash", "python-dateutil"
+        "ImageHash", "influxdb", "siphash", "python-dateutil", "redis", "ujson"
     ]
 )

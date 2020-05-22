@@ -1,5 +1,7 @@
 import base64
 import sqlite3
+import redis
+import ujson as json
 
 
 class PersistentState:
@@ -13,6 +15,40 @@ class PersistentState:
 
     def __getitem__(self, table):
         return Table(self, table)
+
+
+class VolatileState:
+    """Quick and dirty volatile dict-like redis wrapper"""
+    def __init__(self, prefix, ttl=3600, **redis_args):
+        self.rdb = redis.Redis(**redis_args)
+        self.prefix = prefix
+        self.ttl = 3600
+
+    def __getitem__(self, table):
+        return RedisTable(self, table)
+
+
+class RedisTable:
+    def __init__(self, state, table):
+        self._state = state
+        self._table = table
+
+    def __setitem__(self, key, value):
+        self._state.rdb.set(self._state.prefix + self._table + ":" + str(key), json.dumps(value), ex=self._state.ttl)
+
+    def __getitem__(self, key):
+        val = self._state.rdb.get(self._state.prefix + self._table + ":" + str(key))
+        if val:
+            return json.loads(val)
+        return None
+
+    def __delitem__(self, key):
+        self._state.rdb.delete(self._state.prefix + self._table + ":" + str(key))
+
+    def __iter__(self):
+        for key in self._state.rdb.scan_iter(self._state.prefix + self._table + "*"):
+            val = self._state.rdb.get(key)
+            yield json.loads(val) if val else None
 
 
 class Table:
