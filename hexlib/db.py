@@ -129,3 +129,20 @@ def _deserialize(value, col_type):
     if col_type == "blob":
         return base64.b64decode(value)
     return value
+
+
+def pg_fetch_cursor_all(cur, name, batch_size=1000):
+
+    while True:
+        cur.execute("FETCH FORWARD %s FROM %s", (batch_size, name))
+        cnt = 0
+
+        for row in cur:
+            cnt += 1
+            yield row
+
+        if cnt != batch_size:
+            cur.execute("FETCH ALL FROM %s", (batch_size, name))
+            for row in cur:
+                yield row
+            break

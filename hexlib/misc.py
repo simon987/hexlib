@@ -1,4 +1,6 @@
 import time
+import os
+import sys
 
 import atexit
 import siphash
@@ -28,7 +30,6 @@ def rate_limit(per_second):
 
 
 def buffered(batch_size: int, flush_on_exit: bool = False):
-
     def decorate(func):
         buffer = []
         lock = Lock()
@@ -58,3 +59,12 @@ def strhash(str):
 
 def signed64(i):
     return -(i & 0x8000000000000000) | (i & 0x7fffffffffffffff)
+
+
+def silent_stdout(func, *args, **kwargs):
+    with open(os.devnull, 'w') as null:
+        stdout = sys.stdout
+        sys.stdout = null
+        res = func(*args, **kwargs)
+        sys.stdout = stdout
+    return res
