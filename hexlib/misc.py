@@ -1,10 +1,10 @@
-import time
 import os
 import sys
+import time
+from threading import Lock
 
 import atexit
 import siphash
-from threading import Lock
 
 last_time_called = dict()
 
@@ -61,10 +61,19 @@ def signed64(i):
     return -(i & 0x8000000000000000) | (i & 0x7fffffffffffffff)
 
 
-def silent_stdout(func, *args, **kwargs):
-    with open(os.devnull, 'w') as null:
-        stdout = sys.stdout
-        sys.stdout = null
-        res = func(*args, **kwargs)
-        sys.stdout = stdout
-    return res
+class CustomStdOut:
+    original_stdout = sys.stdout
+
+    def __init__(self, fname):
+        self.fname = fname
+
+    def __enter__(self):
+        self.fp = open(self.fname, "w")
+        sys.stdout = self.fp
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout = CustomStdOut.original_stdout
+        self.fp.close()
+
+
+silent_stdout = CustomStdOut(os.devnull)
