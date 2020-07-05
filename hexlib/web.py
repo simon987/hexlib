@@ -1,14 +1,14 @@
-from http.cookiejar import Cookie
+import pickle
 import re
+from base64 import b64encode, b64decode
+from http.cookiejar import Cookie
+from io import BytesIO
 
 from dateutil.parser import parse
-import pickle
-
 from requests.cookies import RequestsCookieJar
 
 
 def cookie_from_string(text: str, domain: str) -> Cookie:
-
     tokens = [t.strip() for t in text.split(";")]
 
     name, value = tokens[0].split("=")
@@ -37,6 +37,16 @@ def cookie_from_string(text: str, domain: str) -> Cookie:
         rest=None,
         rfc2109=False
     )
+
+
+def encode_cookiejar(cj):
+    return b64encode(pickle.dumps(cj._cookies)).decode()
+
+
+def decode_cookiejar(data):
+    cj = RequestsCookieJar()
+    cj._cookies = pickle.loads(b64decode(data))
+    return cj
 
 
 def save_cookiejar(cj, filename):
