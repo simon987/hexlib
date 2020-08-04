@@ -1,4 +1,23 @@
+import os
 import random
+from functools import lru_cache
+
+
+@lru_cache
+def _words():
+    with open(os.path.join(os.path.dirname(__file__), "data/words.txt")) as f:
+        return [line.strip().lower() for line in f]
+
+
+def random_word():
+    return random.choice(_words())
+
+
+def random_phrase(words=10, capitalize=True, suffix="."):
+    phrase = " ".join(random_word() for _ in range(words))
+    if capitalize:
+        phrase = phrase.capitalize()
+    return phrase + suffix
 
 
 def fuzz(buf: bytes, n: int, width: int):
