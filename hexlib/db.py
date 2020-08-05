@@ -1,7 +1,7 @@
 import base64
 import sqlite3
 import redis
-import ujson as json
+import orjson as json
 
 
 class PersistentState:

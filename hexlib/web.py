@@ -2,7 +2,6 @@ import pickle
 import re
 from base64 import b64encode, b64decode
 from http.cookiejar import Cookie
-from io import BytesIO
 
 from dateutil.parser import parse
 from requests.cookies import RequestsCookieJar
