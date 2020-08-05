@@ -9,6 +9,11 @@ import siphash
 last_time_called = dict()
 
 
+def chunks(lst: list, chunk_len: int):
+    for i in range(0, len(lst), chunk_len):
+        yield lst[i:i + chunk_len]
+
+
 def rate_limit(per_second):
     min_interval = 1.0 / float(per_second)
 
