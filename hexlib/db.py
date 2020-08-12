@@ -22,7 +22,7 @@ class VolatileState:
     def __init__(self, prefix, ttl=3600, **redis_args):
         self.rdb = redis.Redis(**redis_args)
         self.prefix = prefix
-        self.ttl = 3600
+        self.ttl = ttl
 
     def __getitem__(self, table):
         return RedisTable(self, table)
