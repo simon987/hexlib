@@ -134,7 +134,7 @@ def _deserialize(value, col_type):
 def pg_fetch_cursor_all(cur, name, batch_size=1000):
 
     while True:
-        cur.execute("FETCH FORWARD %s FROM %s", (batch_size, name))
+        cur.execute("FETCH FORWARD %d FROM %s" % (batch_size, name))
         cnt = 0
 
         for row in cur:
@@ -142,7 +142,7 @@ def pg_fetch_cursor_all(cur, name, batch_size=1000):
             yield row
 
         if cnt != batch_size:
-            cur.execute("FETCH ALL FROM %s", (batch_size, name))
+            cur.execute("FETCH ALL FROM %s" % (name,))
             for row in cur:
                 yield row
             break
