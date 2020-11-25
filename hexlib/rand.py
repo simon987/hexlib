@@ -26,7 +26,7 @@ def fuzz(buf: bytes, n: int, width: int):
         i = random.randint(0, len(buf))
         for off in range(width):
             if i + off < len(buf):
-                fuzzed[i + off] = fuzzed[i + off] + 1
+                fuzzed[i + off] = random.randint(0, 255)
     return fuzzed
 
 
