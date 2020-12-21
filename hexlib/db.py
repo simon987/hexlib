@@ -2,6 +2,7 @@ import base64
 import sqlite3
 import redis
 import orjson as json
+import umsgpack
 
 
 class PersistentState:
@@ -20,10 +21,9 @@ class PersistentState:
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
 
-    def __init__(self, prefix, ttl=3600, **redis_args):
+    def __init__(self, prefix, **redis_args):
         self.rdb = redis.Redis(**redis_args)
         self.prefix = prefix
-        self.ttl = ttl
 
     def __getitem__(self, table):
         return RedisTable(self, table)
@@ -46,21 +46,22 @@ class RedisTable:
         self._table = table
 
     def __setitem__(self, key, value):
-        self._state.rdb.set(self._state.prefix + self._table + ":" + str(key), json.dumps(value), ex=self._state.ttl)
+        self._state.rdb.hset(self._state.prefix + self._table, str(key), umsgpack.dumps(value))
 
     def __getitem__(self, key):
-        val = self._state.rdb.get(self._state.prefix + self._table + ":" + str(key))
+        val = self._state.rdb.hget(self._state.prefix + self._table, str(key))
         if val:
-            return json.loads(val)
+            return umsgpack.loads(val)
         return None
 
     def __delitem__(self, key):
-        self._state.rdb.delete(self._state.prefix + self._table + ":" + str(key))
+        self._state.rdb.hdel(self._state.prefix + self._table, str(key))
 
     def __iter__(self):
-        for key in self._state.rdb.scan_iter(self._state.prefix + self._table + "*"):
-            val = self._state.rdb.get(key)
-            yield json.loads(val) if val else None
+        val = self._state.rdb.hgetall(self._state.prefix + self._table)
+        if val:
+            return ((k, umsgpack.loads(v)) for k, v in
+                    self._state.rdb.hgetall(self._state.prefix + self._table).items())
 
 
 class RedisBooleanTable:

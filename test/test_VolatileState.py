@@ -23,7 +23,7 @@ class TestVolatileState(TestCase):
         s["b"]["3"] = 3
         s["b"]["4"] = 4
 
-        self.assertEqual(sum(s["b"]), 10)
+        self.assertEqual(sum(v for k,v in s["b"]), 10)
 
     def test_int_key(self):
         s = VolatileState(prefix="test2")
