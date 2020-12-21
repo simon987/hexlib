@@ -32,10 +32,9 @@ class VolatileState:
 class VolatileBooleanState:
     """Quick and dirty volatile dict-like redis wrapper for boolean values"""
 
-    def __init__(self, prefix, ttl=3600, **redis_args):
+    def __init__(self, prefix, **redis_args):
         self.rdb = redis.Redis(**redis_args)
         self.prefix = prefix
-        self.ttl = ttl
 
     def __getitem__(self, table):
         return RedisBooleanTable(self, table)
