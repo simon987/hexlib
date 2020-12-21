@@ -19,6 +19,7 @@ class PersistentState:
 
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
+
     def __init__(self, prefix, ttl=3600, **redis_args):
         self.rdb = redis.Redis(**redis_args)
         self.prefix = prefix
@@ -26,6 +27,18 @@ class VolatileState:
 
     def __getitem__(self, table):
         return RedisTable(self, table)
+
+
+class VolatileBooleanState:
+    """Quick and dirty volatile dict-like redis wrapper for boolean values"""
+
+    def __init__(self, prefix, ttl=3600, **redis_args):
+        self.rdb = redis.Redis(**redis_args)
+        self.prefix = prefix
+        self.ttl = ttl
+
+    def __getitem__(self, table):
+        return RedisBooleanTable(self, table)
 
 
 class RedisTable:
@@ -49,6 +62,27 @@ class RedisTable:
         for key in self._state.rdb.scan_iter(self._state.prefix + self._table + "*"):
             val = self._state.rdb.get(key)
             yield json.loads(val) if val else None
+
+
+class RedisBooleanTable:
+    def __init__(self, state, table):
+        self._state = state
+        self._table = table
+
+    def __setitem__(self, key, value):
+        if value:
+            self._state.rdb.sadd(self._state.prefix + self._table, str(key))
+        else:
+            self.__delitem__(key)
+
+    def __getitem__(self, key):
+        return self._state.rdb.sismember(self._state.prefix + self._table, str(key))
+
+    def __delitem__(self, key):
+        self._state.rdb.srem(self._state.prefix + self._table, str(key))
+
+    def __iter__(self):
+        return iter(self._state.rdb.smembers(self._state.prefix + self._table))
 
 
 class Table:
@@ -132,7 +166,6 @@ def _deserialize(value, col_type):
 
 
 def pg_fetch_cursor_all(cur, name, batch_size=1000):
-
     while True:
         cur.execute("FETCH FORWARD %d FROM %s" % (batch_size, name))
         cnt = 0

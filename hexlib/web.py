@@ -1,7 +1,11 @@
 import pickle
 import re
+import os
+from datetime import datetime
 from base64 import b64encode, b64decode
 from http.cookiejar import Cookie
+import requests
+import orjson as json
 
 from dateutil.parser import parse
 from requests.cookies import RequestsCookieJar
@@ -68,3 +72,35 @@ def cookiejar_filter(cj, pattern):
         if re.match(pattern, c.domain):
             filtered_cj.set_cookie(c)
     return filtered_cj
+
+
+def download_file(url, destination, session=None, headers=None, overwrite=False, retries=1, err_cb=None,
+                  save_meta=False):
+    if os.path.exists(destination) and not overwrite:
+        return
+
+    if session is None:
+        session = requests.session()
+
+    while retries > 0:
+        try:
+            r = session.get(url, stream=True, headers=headers)
+
+            with open(destination + ".part", "wb") as f:
+                for chunk in r.iter_content(chunk_size=4096):
+                    if chunk:
+                        f.write(chunk)
+            os.rename(destination + ".part", destination)
+
+            if save_meta:
+                with open(destination + ".meta", "wb") as f:
+                    f.write(json.dumps({
+                        "headers": dict(**r.headers),
+                        "url": url,
+                        "timestamp": datetime.utcnow().replace(microsecond=0).isoformat()
+                    }))
+            break
+        except Exception as e:
+            if err_cb:
+                err_cb(e)
+            retries -= 1

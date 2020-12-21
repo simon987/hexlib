@@ -9,6 +9,18 @@ import siphash
 last_time_called = dict()
 
 
+def retry(attempts, callback=None):
+    def decorate(func):
+        retries = attempts
+        while retries > 0:
+            try:
+                func()
+            except Exception as e:
+                if callback:
+                    callback(e)
+    return decorate
+
+
 def chunks(lst: list, chunk_len: int):
     for i in range(0, len(lst), chunk_len):
         yield lst[i:i + chunk_len]
