@@ -7,10 +7,12 @@ from hexlib.db import PersistentState
 class TestPersistentState(TestCase):
 
     def tearDown(self) -> None:
-        os.remove("state.db")
+        if os.path.exists("state.db"):
+            os.remove("state.db")
 
     def setUp(self) -> None:
-        os.remove("state.db")
+        if os.path.exists("state.db"):
+            os.remove("state.db")
 
     def test_get_set(self):
         s = PersistentState()
