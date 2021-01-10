@@ -139,8 +139,8 @@ class Table:
             except sqlite3.IntegrityError:
                 sql = "UPDATE %s SET (%s) = (%s) WHERE id=?" \
                       % (self._table, ",".join(value.keys()), ",".join("?" for _ in value.values()))
-                args = [key]
-                args.extend(_serialize(v) for v in value.values())
+                args = list(_serialize(v) for v in value.values())
+                args.append(key)
                 conn.execute(
                     sql,
                     args

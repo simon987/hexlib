@@ -33,3 +33,17 @@ class TestPersistentState(TestCase):
         val["id"] = 1
 
         self.assertDictEqual(val, s["a"][1])
+
+    def test_update_partial(self):
+        s = PersistentState()
+
+        val = {"a": 1, "b": "2", "c": b'3', "d": 4.4}
+        s["a"][1] = val
+        s["a"][1] = {
+            "a": 2
+        }
+
+        val["a"] = 2
+        val["id"] = 1
+
+        self.assertDictEqual(val, s["a"][1])
