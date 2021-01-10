@@ -126,9 +126,13 @@ class Table:
             try:
                 conn.execute(sql, list(_serialize(v) for v in value.values()))
             except sqlite3.OperationalError:
+                if isinstance(key, int):
+                    key_type = "integer"
+                else:
+                    key_type = "text"
                 conn.execute(
-                    "create table if not exists %s (id text primary key,%s)" %
-                    (self._table, ",".join("%s %s" % (k, _sqlite_type(v)) for k, v in value.items()))
+                    "create table if not exists %s (id %s primary key,%s)" %
+                    (self._table, key_type, ",".join("%s %s" % (k, _sqlite_type(v)) for k, v in value.items()))
                 )
                 conn.execute(sql, list(_serialize(v) for v in value.values()))
 
