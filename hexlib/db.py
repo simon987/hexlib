@@ -162,6 +162,8 @@ def _serialize(value):
         return base64.b64encode(value)
     if value is None:
         return None
+    if isinstance(value, bool):
+        return value
     return str(value)
 
 

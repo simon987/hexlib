@@ -61,3 +61,17 @@ class TestPersistentState(TestCase):
         val["id"] = 1
 
         self.assertDictEqual(val, s["a"][1])
+
+    def test_bool(self):
+        s = PersistentState()
+
+        val = {"a": True, "b": False}
+        s["a"][1] = val
+        s["a"][1] = {
+            "a": True
+        }
+
+        val["a"] = True
+        val["id"] = 1
+
+        self.assertDictEqual(val, s["a"][1])
