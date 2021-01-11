@@ -47,3 +47,17 @@ class TestPersistentState(TestCase):
         val["id"] = 1
 
         self.assertDictEqual(val, s["a"][1])
+
+    def test_none(self):
+        s = PersistentState()
+
+        val = {"a": 1, "b": None}
+        s["a"][1] = val
+        s["a"][1] = {
+            "a": None
+        }
+
+        val["a"] = None
+        val["id"] = 1
+
+        self.assertDictEqual(val, s["a"][1])
