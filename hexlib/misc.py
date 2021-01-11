@@ -11,13 +11,16 @@ last_time_called = dict()
 
 def retry(attempts, callback=None):
     def decorate(func):
-        retries = attempts
-        while retries > 0:
-            try:
-                func()
-            except Exception as e:
-                if callback:
-                    callback(e)
+        def wrapper(*args, **kwargs):
+            retries = attempts
+            while retries > 0:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if callback:
+                        callback(e)
+                    retries -= 1
+        return wrapper
     return decorate
 
 
