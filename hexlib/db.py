@@ -90,6 +90,16 @@ class Table:
         self._state = state
         self._table = table
 
+    def sql(self, where_clause, *params):
+        with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                cur = conn.execute("SELECT * FROM %s %s" % (self._table, where_clause), params)
+                for row in cur:
+                    yield dict(row)
+            except:
+                return None
+
     def __iter__(self):
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row

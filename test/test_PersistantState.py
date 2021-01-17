@@ -75,3 +75,14 @@ class TestPersistentState(TestCase):
         val["id"] = 1
 
         self.assertDictEqual(val, s["a"][1])
+
+    def test_sql(self):
+        s = PersistentState()
+
+        s["a"][1] = {"a": True}
+        s["a"][2] = {"a": False}
+        s["a"][3] = {"a": True}
+
+        items = list(s["a"].sql("WHERE a=0 ORDER BY id"))
+
+        self.assertDictEqual(items[0], s["a"][2])
