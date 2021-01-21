@@ -78,4 +78,20 @@ class TestVolatileQueue(TestCase):
         s.put("test")
         item = s.get()
 
-        self.assertTrue(item == b"test")
+        self.assertTrue(item == "test")
+
+    def test_dict(self):
+        s = VolatileQueue(key="test5")
+
+        s.put({"a": 1})
+        item = s.get()
+
+        self.assertTrue(item["a"] == 1)
+
+    def test_int(self):
+        s = VolatileQueue(key="test5")
+
+        s.put(123)
+        item = s.get()
+
+        self.assertTrue(item == 123)

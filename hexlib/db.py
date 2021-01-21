@@ -37,10 +37,12 @@ class VolatileQueue:
         self.key = key
 
     def put(self, item):
-        self.rdb.sadd(self.key, item)
+        self.rdb.sadd(self.key, umsgpack.dumps(item))
 
     def get(self):
-        return self.rdb.spop(self.key)
+        v = self.rdb.spop(self.key)
+        if v:
+            return umsgpack.loads(v)
 
 
 class VolatileBooleanState:
