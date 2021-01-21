@@ -29,6 +29,20 @@ class VolatileState:
         return RedisTable(self, table)
 
 
+class VolatileQueue:
+    """Quick and dirty volatile queue-like redis wrapper"""
+
+    def __init__(self, key, **redis_args):
+        self.rdb = redis.Redis(**redis_args)
+        self.key = key
+
+    def put(self, item):
+        self.rdb.sadd(self.key, item)
+
+    def get(self):
+        return self.rdb.spop(self.key)
+
+
 class VolatileBooleanState:
     """Quick and dirty volatile dict-like redis wrapper for boolean values"""
 

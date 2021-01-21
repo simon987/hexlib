@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hexlib.db import VolatileState, VolatileBooleanState
+from hexlib.db import VolatileState, VolatileBooleanState, VolatileQueue
 
 
 class TestVolatileState(TestCase):
@@ -23,7 +23,7 @@ class TestVolatileState(TestCase):
         s["b"]["3"] = 3
         s["b"]["4"] = 4
 
-        self.assertEqual(sum(v for k,v in s["b"]), 10)
+        self.assertEqual(sum(v for k, v in s["b"]), 10)
 
     def test_int_key(self):
         s = VolatileState(prefix="test2")
@@ -68,3 +68,14 @@ class TestVolatileBoolState(TestCase):
         self.assertTrue(s["c"]["1"])
         del s["c"]["1"]
         self.assertFalse(s["c"]["1"])
+
+
+class TestVolatileQueue(TestCase):
+
+    def test_simple(self):
+        s = VolatileQueue(key="test5")
+
+        s.put("test")
+        item = s.get()
+
+        self.assertTrue(item == b"test")
