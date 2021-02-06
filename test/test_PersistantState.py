@@ -86,3 +86,27 @@ class TestPersistentState(TestCase):
         items = list(s["a"].sql("WHERE a=0 ORDER BY id"))
 
         self.assertDictEqual(items[0], s["a"][2])
+
+    def test_delitem(self):
+        s = PersistentState()
+
+        s["a"][1] = {"a": True}
+        del s["a"][1]
+
+        self.assertIsNone(s["a"][1])
+
+    def test_delitem_nonexistent(self):
+        s = PersistentState()
+
+        s["a"][1] = {"a": True}
+        del s["a"][456]
+
+        self.assertIsNotNone(s["a"][1])
+
+    def test_delitem_no_table(self):
+        s = PersistentState()
+
+        try:
+            del s["a"][456]
+        except Exception as e:
+            self.fail(e)
