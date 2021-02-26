@@ -151,9 +151,9 @@ class Web:
     def _format_url(self, method, url, kwargs, r=None):
         if "params" in kwargs and kwargs["params"]:
             return "%s %s?%s <%s>" % (method, url, "&".join(f"{k}={v}" for k, v in kwargs["params"].items()),
-                                      r.status_code if r else "ERR")
+                                      r.status_code if r is not None else "ERR")
         else:
-            return "%s %s <%s>" % (method, url, r.status_code if r else "ERR",)
+            return "%s %s <%s>" % (method, url, r.status_code if r is not None else "ERR",)
 
     def get(self, url, **kwargs):
 
