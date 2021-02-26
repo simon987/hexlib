@@ -3,10 +3,10 @@ import sqlite3
 import traceback
 
 import psycopg2
-import redis
-import orjson as json
 import umsgpack
 from psycopg2.errorcodes import UNIQUE_VIOLATION
+
+from hexlib.env import get_redis
 
 
 class PersistentState:
@@ -25,8 +25,8 @@ class PersistentState:
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
 
-    def __init__(self, prefix, **redis_args):
-        self.rdb = redis.Redis(**redis_args)
+    def __init__(self, prefix, redis_db):
+        self.rdb = redis_db
         self.prefix = prefix
 
     def __getitem__(self, table):
@@ -36,8 +36,10 @@ class VolatileState:
 class VolatileQueue:
     """Quick and dirty volatile queue-like redis wrapper"""
 
-    def __init__(self, key, **redis_args):
-        self.rdb = redis.Redis(**redis_args)
+    def __init__(self, key, redis_db=None):
+        if redis_db is None:
+            redis_db = get_redis()
+        self.rdb = redis_db
         self.key = key
 
     def put(self, item):
@@ -52,8 +54,8 @@ class VolatileQueue:
 class VolatileBooleanState:
     """Quick and dirty volatile dict-like redis wrapper for boolean values"""
 
-    def __init__(self, prefix, **redis_args):
-        self.rdb = redis.Redis(**redis_args)
+    def __init__(self, prefix, redis_db):
+        self.rdb = redis_db
         self.prefix = prefix
 
     def __getitem__(self, table):
@@ -182,7 +184,6 @@ class Table:
                 conn.execute("DELETE FROM %s WHERE id=?" % self._table, (key,))
             except sqlite3.OperationalError:
                 pass
-
 
 
 def _sqlite_type(value):

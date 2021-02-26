@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hexlib.db import VolatileState, VolatileBooleanState
+
 from hexlib.misc import retry
 
 

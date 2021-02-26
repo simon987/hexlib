@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from hexlib.db import VolatileState, VolatileBooleanState, VolatileQueue
 
 

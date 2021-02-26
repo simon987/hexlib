@@ -4,11 +4,15 @@ import os
 from datetime import datetime
 from base64 import b64encode, b64decode
 from http.cookiejar import Cookie
+from time import time
+
 import requests
 import orjson as json
 
 from dateutil.parser import parse
 from requests.cookies import RequestsCookieJar
+
+from hexlib.misc import rate_limit, retry
 
 
 def cookie_from_string(text: str, domain: str) -> Cookie:
@@ -104,3 +108,63 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
             if err_cb:
                 err_cb(e)
             retries -= 1
+
+class Web:
+    def __init__(self, proxy=None, rps=1, retries=3, logger=None, cookie_file=None, retry_codes=None, session=None):
+        self._cookie_file = cookie_file
+        self._proxy = proxy
+        self._logger = logger
+        self._current_req = None
+        if retry_codes is None:
+            retry_codes = {502, 504, 522, 524, 429}
+        self._retry_codes = retry_codes
+
+        if session is None:
+            session = requests.session()
+
+        self._session = session
+
+        if self._cookie_file:
+            self._session.cookies = load_cookiejar(cookie_file)
+
+        if self._proxy:
+            self._session.proxies = {
+                "http": proxy,
+                "https": proxy,
+            }
+
+        @rate_limit(rps)
+        @retry(retries, callback=self._error_callback)
+        def get(url, **kwargs):
+            self._current_req = "GET", url, kwargs
+            r = self._session.get(url, **kwargs)
+
+            if r.status_code in self._retry_codes:
+                raise Exception(f"HTTP {r.status_code}")
+            return r
+
+        self._get = get
+
+    def _error_callback(self, e):
+        self._logger.critical(f"{self._format_url(*self._current_req)}: {e}")
+
+    def _format_url(self, method, url, kwargs, r=None):
+        if "params" in kwargs and kwargs["params"]:
+            return "%s %s?%s <%s>" % (method, url, "&".join(f"{k}={v}" for k, v in kwargs["params"].items()),
+                                      r.status_code if r else "ERR")
+        else:
+            return "%s %s <%s>" % (method, url, r.status_code if r else "ERR",)
+
+    def get(self, url, **kwargs):
+
+        time_start = time()
+        r = self._get(url, **kwargs)
+
+        if self._cookie_file:
+            save_cookiejar(self._session.cookies, self._cookie_file)
+
+        if self._logger and r is not None:
+            self._logger.debug(self._format_url("GET", url, kwargs, r) + " %.2fs" % (time() - time_start))
+        return r
+
+
