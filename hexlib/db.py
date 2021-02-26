@@ -25,7 +25,9 @@ class PersistentState:
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
 
-    def __init__(self, prefix, redis_db):
+    def __init__(self, prefix, redis_db=None):
+        if redis_db is None:
+            redis_db = get_redis()
         self.rdb = redis_db
         self.prefix = prefix
 
@@ -54,7 +56,9 @@ class VolatileQueue:
 class VolatileBooleanState:
     """Quick and dirty volatile dict-like redis wrapper for boolean values"""
 
-    def __init__(self, prefix, redis_db):
+    def __init__(self, prefix, redis_db=None):
+        if redis_db is None:
+            redis_db = get_redis()
         self.rdb = redis_db
         self.prefix = prefix
 
