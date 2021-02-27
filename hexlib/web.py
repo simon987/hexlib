@@ -109,13 +109,14 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
                 err_cb(e)
             retries -= 1
 
+
 class Web:
     def __init__(self, proxy=None, rps=1, retries=3, logger=None, cookie_file=None, retry_codes=None, session=None):
         self._cookie_file = cookie_file
         self._proxy = proxy
         self._logger = logger
         self._current_req = None
-        if retry_codes is None:
+        if retry_codes is None or not retry_codes:
             retry_codes = {502, 504, 522, 524, 429}
         self._retry_codes = retry_codes
 
@@ -166,5 +167,3 @@ class Web:
         if self._logger and r is not None:
             self._logger.debug(self._format_url("GET", url, kwargs, r) + " %.2fs" % (time() - time_start))
         return r
-
-
