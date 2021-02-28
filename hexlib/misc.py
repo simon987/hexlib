@@ -57,6 +57,12 @@ def buffered(batch_size: int, flush_on_exit: bool = False):
             atexit.register(func, buffer)
 
         def wrapper(items):
+
+            if items is None:
+                func(buffer)
+                buffer.clear()
+                return
+
             with lock:
                 for item in items:
                     buffer.append(item)
