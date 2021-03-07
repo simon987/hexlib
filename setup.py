@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hexlib",
-    version="1.30",
+    version="1.31",
     description="Misc utility methods",
     author="simon987",
     author_email="me@simon987.net",
@@ -13,6 +13,6 @@ setup(
     ]},
     install_requires=[
         "ImageHash", "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
-        "u-msgpack-python", "psycopg2-binary"
+        "u-msgpack-python", "psycopg2-binary", "fake-useragent"
     ]
 )

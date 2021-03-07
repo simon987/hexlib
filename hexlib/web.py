@@ -111,7 +111,8 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
 
 
 class Web:
-    def __init__(self, proxy=None, rps=1, retries=3, logger=None, cookie_file=None, retry_codes=None, session=None):
+    def __init__(self, proxy=None, rps=1, retries=3, logger=None, cookie_file=None, retry_codes=None, session=None,
+                 ua=None):
         self._cookie_file = cookie_file
         self._proxy = proxy
         self._logger = logger
@@ -124,6 +125,9 @@ class Web:
             session = requests.session()
 
         self._session = session
+
+        if ua is not None:
+            session.headers["User-Agent"] = ua
 
         if self._cookie_file:
             self._session.cookies = load_cookiejar(cookie_file)
