@@ -1,10 +1,13 @@
-import redis
 import os
-from fake_useragent import UserAgent
 
+import redis
+from fake_useragent import UserAgent
 
 from hexlib.log import stdout_logger
 from hexlib.web import Web
+
+ARC_LISTS = os.environ.get("ARC_LISTS", "arc").split(",")
+PUBLISH_CHANNEL = os.environ.get("PUBLISH_CHANNEL", None)
 
 
 def get_redis():
@@ -12,6 +15,20 @@ def get_redis():
         host=os.environ.get("REDIS_HOST", "localhost"),
         port=int(os.environ.get("REDIS_PORT", 6379))
     )
+
+
+def redis_publish(rdb, item, item_source, item_type, item_category="x"):
+
+    item_source = item_source.replace(".", "-")
+    item_type = item_type.replace(".", "-")
+    item_category = item_category.replace(".", "-")
+
+    if PUBLISH_CHANNEL is not None:
+        routing_key = f"{PUBLISH_CHANNEL}.{item_source}.{item_type}.{item_category}"
+        rdb.publish(routing_key, item)
+    for arc_list in ARC_LISTS:
+        routing_key = f"{arc_list}.{item_source}.{item_type}.{item_category}"
+        rdb.publish(routing_key, item)
 
 
 def get_web():
