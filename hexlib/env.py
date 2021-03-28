@@ -32,7 +32,7 @@ def redis_publish(rdb, item, item_project,  item_type, item_subproject=None, ite
         rdb.publish(routing_key, item)
     for arc_list in ARC_LISTS:
         routing_key = f"{arc_list}.{item_source}.{item_type}.{item_category}"
-        rdb.publish(routing_key, item)
+        rdb.lpush(routing_key, item)
 
 
 def get_web():
