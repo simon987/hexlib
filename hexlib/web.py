@@ -5,6 +5,7 @@ from datetime import datetime
 from base64 import b64encode, b64decode
 from http.cookiejar import Cookie
 from time import time
+from bs4 import BeautifulSoup
 
 import requests
 import orjson as json
@@ -171,3 +172,9 @@ class Web:
         if self._logger and r is not None:
             self._logger.debug(self._format_url("GET", url, kwargs, r) + " %.2fs" % (time() - time_start))
         return r
+
+    def get_soup(self, url, **kwargs):
+        r = self.get(url, **kwargs)
+        if not r:
+            return None
+        return BeautifulSoup(r.content, "html.parser")
