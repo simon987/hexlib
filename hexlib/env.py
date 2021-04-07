@@ -45,5 +45,6 @@ def get_web(session=None):
         logger=stdout_logger,
         cookie_file=os.environ.get("COOKIE_FILE", None),
         retry_codes=set(int(x) if x else None for x in os.environ.get("RETRY_CODES", "").split(",")),
+        retry_sleep=int(os.environ.get("RETRY_SLEEP", 0)),
         ua=ua[os.environ.get("USER_AGENT")] if os.environ.get("USER_AGENT", None) is not None else None
     )
