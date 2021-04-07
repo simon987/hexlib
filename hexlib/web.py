@@ -112,7 +112,7 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
 
 
 class Web:
-    def __init__(self, proxy=None, rps=1, retries=3, logger=None, cookie_file=None, retry_codes=None, session=None,
+    def __init__(self, proxy=None, rps=1, retries=3, retry_sleep=0, logger=None, cookie_file=None, retry_codes=None, session=None,
                  ua=None):
         self._cookie_file = cookie_file
         self._proxy = proxy
@@ -140,7 +140,7 @@ class Web:
             }
 
         @rate_limit(rps)
-        @retry(retries, callback=self._error_callback)
+        @retry(retries, callback=self._error_callback, retry_sleep=retry_sleep)
         def get(url, **kwargs):
             self._current_req = "GET", url, kwargs
             r = self._session.get(url, **kwargs)

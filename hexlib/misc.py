@@ -4,12 +4,14 @@ import time
 from threading import Lock
 
 import atexit
+from time import sleep
+
 import siphash
 
 last_time_called = dict()
 
 
-def retry(attempts, callback=None):
+def retry(attempts, callback=None, retry_sleep=0):
     def decorate(func):
         def wrapper(*args, **kwargs):
             retries = attempts
@@ -20,6 +22,7 @@ def retry(attempts, callback=None):
                     if callback:
                         callback(e)
                     retries -= 1
+                    sleep(retry_sleep)
         return wrapper
     return decorate
 
