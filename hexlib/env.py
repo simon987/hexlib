@@ -35,10 +35,11 @@ def redis_publish(rdb, item, item_project,  item_type, item_subproject=None, ite
         rdb.lpush(routing_key, item)
 
 
-def get_web():
+def get_web(session=None):
     ua = UserAgent()
 
     return Web(
+        session=session,
         proxy=os.environ.get("PROXY", None),
         rps=os.environ.get("RPS", 1),
         logger=stdout_logger,
