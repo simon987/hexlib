@@ -20,7 +20,7 @@ def get_redis():
 def redis_publish(rdb, item, item_project,  item_type, item_subproject=None, item_category="x"):
 
     item_project = item_project.replace(".", "-")
-    item_subproject = item_subproject.replace(".", "-")
+    item_subproject = item_subproject.replace(".", "-") if item_subproject else None
 
     item_source = item_project if not item_subproject else f"{item_project}.{item_subproject}"
 
