@@ -12,8 +12,9 @@ from hexlib.env import get_redis
 class PersistentState:
     """Quick and dirty persistent dict-like SQLite wrapper"""
 
-    def __init__(self, dbfile="state.db", **dbargs):
+    def __init__(self, dbfile="state.db", logger=None, **dbargs):
         self.dbfile = dbfile
+        self.logger = logger
         if dbargs is None:
             dbargs = {"timeout": 30000}
         self.dbargs = dbargs
@@ -25,14 +26,15 @@ class PersistentState:
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
 
-    def __init__(self, prefix, redis_db=None):
+    def __init__(self, prefix, redis_db=None, sep=""):
         if redis_db is None:
             redis_db = get_redis()
         self.rdb = redis_db
         self.prefix = prefix
+        self._sep = sep
 
     def __getitem__(self, table):
-        return RedisTable(self, table)
+        return RedisTable(self, table, self._sep)
 
 
 class VolatileQueue:
@@ -56,59 +58,63 @@ class VolatileQueue:
 class VolatileBooleanState:
     """Quick and dirty volatile dict-like redis wrapper for boolean values"""
 
-    def __init__(self, prefix, redis_db=None):
+    def __init__(self, prefix, redis_db=None, sep=""):
         if redis_db is None:
             redis_db = get_redis()
         self.rdb = redis_db
         self.prefix = prefix
+        self._sep = sep
 
     def __getitem__(self, table):
-        return RedisBooleanTable(self, table)
+        return RedisBooleanTable(self, table, self._sep)
 
 
 class RedisTable:
-    def __init__(self, state, table):
+    def __init__(self, state, table, sep=""):
         self._state = state
         self._table = table
+        self._sep = sep
+        self._key = f"{self._state.prefix}{self._sep}{self._table}"
 
     def __setitem__(self, key, value):
-        self._state.rdb.hset(self._state.prefix + self._table, str(key), umsgpack.dumps(value))
+        self._state.rdb.hset(self._key, str(key), umsgpack.dumps(value))
 
     def __getitem__(self, key):
-        val = self._state.rdb.hget(self._state.prefix + self._table, str(key))
+        val = self._state.rdb.hget(self._key, str(key))
         if val:
             return umsgpack.loads(val)
         return None
 
     def __delitem__(self, key):
-        self._state.rdb.hdel(self._state.prefix + self._table, str(key))
+        self._state.rdb.hdel(self._key, str(key))
 
     def __iter__(self):
-        val = self._state.rdb.hgetall(self._state.prefix + self._table)
+        val = self._state.rdb.hgetall(self._key)
         if val:
-            return ((k, umsgpack.loads(v)) for k, v in
-                    self._state.rdb.hgetall(self._state.prefix + self._table).items())
+            return ((k, umsgpack.loads(v)) for k, v in val.items())
 
 
 class RedisBooleanTable:
-    def __init__(self, state, table):
+    def __init__(self, state, table, sep=""):
         self._state = state
         self._table = table
+        self._sep = sep
+        self._key = f"{self._state.prefix}{self._sep}{self._table}"
 
     def __setitem__(self, key, value):
         if value:
-            self._state.rdb.sadd(self._state.prefix + self._table, str(key))
+            self._state.rdb.sadd(self._key, str(key))
         else:
             self.__delitem__(key)
 
     def __getitem__(self, key):
-        return self._state.rdb.sismember(self._state.prefix + self._table, str(key))
+        return self._state.rdb.sismember(self._key, str(key))
 
     def __delitem__(self, key):
-        self._state.rdb.srem(self._state.prefix + self._table, str(key))
+        self._state.rdb.srem(self._key, str(key))
 
     def __iter__(self):
-        return iter(self._state.rdb.smembers(self._state.prefix + self._table))
+        return iter(self._state.rdb.smembers(self._key))
 
 
 class Table:

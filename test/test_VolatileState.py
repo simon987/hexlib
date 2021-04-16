@@ -16,6 +16,17 @@ class TestVolatileState(TestCase):
 
         self.assertDictEqual(val, s["a"]["1"])
 
+    def test_sep(self):
+        s = VolatileState(prefix="test1", sep=":")
+        val = {
+            "field1": 1,
+            "arr1": [1, 2, 3]
+        }
+
+        s["a"]["1"] = val
+
+        self.assertDictEqual(val, s["a"]["1"])
+
     def test_iter(self):
         s = VolatileState(prefix="test2")
 
@@ -44,6 +55,16 @@ class TestVolatileBoolState(TestCase):
 
     def test_get_set(self):
         s = VolatileBooleanState(prefix="test1")
+
+        s["a"]["1"] = True
+        s["a"]["2"] = True
+
+        self.assertTrue(s["a"]["1"])
+        self.assertTrue(s["a"]["2"])
+        self.assertFalse(s["a"]["3"])
+
+    def test_sep(self):
+        s = VolatileBooleanState(prefix="test1", sep=":")
 
         s["a"]["1"] = True
         s["a"]["2"] = True
