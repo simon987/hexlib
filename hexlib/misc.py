@@ -1,9 +1,8 @@
+import atexit
 import os
 import sys
 import time
 from threading import Lock
-
-import atexit
 from time import sleep
 
 import siphash
@@ -23,7 +22,9 @@ def retry(attempts, callback=None, retry_sleep=0):
                         callback(e)
                     retries -= 1
                     sleep(retry_sleep)
+
         return wrapper
+
     return decorate
 
 
@@ -105,4 +106,20 @@ class CustomStdOut:
         self.fp.close()
 
 
+class CustomStdErr:
+    original_stderr = sys.stderr
+
+    def __init__(self, fname):
+        self.fname = fname
+
+    def __enter__(self):
+        self.fp = open(self.fname, "w")
+        sys.stderr = self.fp
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout = CustomStdErr.original_stderr
+        self.fp.close()
+
+
 silent_stdout = CustomStdOut(os.devnull)
+silent_stderr = CustomStdErr(os.devnull)
