@@ -1,3 +1,6 @@
+from functools import partial
+from multiprocessing.pool import ThreadPool
+
 import nltk.corpus
 from lxml import etree
 from nltk.corpus import stopwords
@@ -15,10 +18,21 @@ nltk.download("wordnet", quiet=True)
 lemmatizer = WordNetLemmatizer()
 
 
+def clean_multithread(texts, processes, **kwargs):
+    pool = ThreadPool(processes=processes)
+    return pool.map(
+        func=partial(clean, **kwargs),
+        iterable=texts,
+    )
+
+
 def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
-          remove_stopwords_en=False, lemmatize=False):
+          remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False):
     if compress_whitespace and remove_stopwords_en:
         raise ValueError("Redundant flags: remove_stopwords implies compress_whitespace")
+
+    if fix_single_quotes:
+        text = text.replace("`", "'")
 
     if clean_html:
         try:
@@ -26,6 +40,9 @@ def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, st
             text = "".join(get_text(root))
         except:
             pass
+
+    if remove_punctuation:
+        text = PUNCTUATION_RE.sub(" ", text)
 
     if lowercase:
         text = text.lower()
@@ -35,9 +52,6 @@ def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, st
 
     if strip:
         text = text.strip()
-
-    if remove_punctuation:
-        text = PUNCTUATION_RE.sub("", text)
 
     if remove_stopwords_en or lemmatize:
         words = WHITESPACE_RE.split(text)
