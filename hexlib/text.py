@@ -50,9 +50,6 @@ def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, st
     if compress_whitespace:
         text = WHITESPACE_RE.sub(" ", text)
 
-    if strip:
-        text = text.strip()
-
     if remove_stopwords_en or lemmatize:
         words = WHITESPACE_RE.split(text)
 
@@ -62,5 +59,8 @@ def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, st
             text = " ".join(w for w in words if w not in stop_words_en)
         elif lemmatize and not remove_stopwords_en:
             text = " ".join(lemmatizer.lemmatize(w) for w in words)
+
+    if strip:
+        text = text.strip()
 
     return text
