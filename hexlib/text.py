@@ -1,5 +1,4 @@
 import nltk.corpus
-from hexlib.misc import silent_stderr
 from lxml import etree
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -10,9 +9,8 @@ get_text = etree.XPath("//text()")
 
 stop_words_en = set(stopwords.words("english"))
 
-with silent_stderr:
-    nltk.download("stopwords")
-    nltk.download("wordnet")
+nltk.download("stopwords", quiet=True)
+nltk.download("wordnet", quiet=True)
 
 lemmatizer = WordNetLemmatizer()
 
