@@ -6,11 +6,17 @@ from lxml import etree
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-from .regex import WHITESPACE_RE, PUNCTUATION_RE
+from .regex import WHITESPACE_RE, PUNCTUATION_RE, LINK_RE
 
 get_text = etree.XPath("//text()")
 
 stop_words_en = set(stopwords.words("english"))
+
+extra_stop_words_en = [
+    "u", "&", "-", "--"
+]
+
+stop_words_en.update(extra_stop_words_en)
 
 nltk.download("stopwords", quiet=True)
 nltk.download("wordnet", quiet=True)
@@ -26,13 +32,14 @@ def clean_multicore(texts, processes, **kwargs):
     )
 
 
-def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
-          remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False):
-    if compress_whitespace and remove_stopwords_en:
-        raise ValueError("Redundant flags: remove_stopwords implies compress_whitespace")
-
+def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
+          remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
+          remove_urls=False):
     if fix_single_quotes:
         text = text.replace("`", "'")
+
+    if remove_urls:
+        text = LINK_RE.sub(" ", text)
 
     if clean_html:
         try:
@@ -47,8 +54,12 @@ def clean(text, compress_whitespace=False, lowercase=False, clean_html=False, st
     if lowercase:
         text = text.lower()
 
-    if compress_whitespace:
+    if not remove_stopwords_en or not lemmatize or not strip_quotes:
         text = WHITESPACE_RE.sub(" ", text)
+
+    if strip_quotes:
+        words = WHITESPACE_RE.split(text)
+        text = " ".join(w.strip("\"'") for w in words)
 
     if remove_stopwords_en or lemmatize:
         words = WHITESPACE_RE.split(text)
