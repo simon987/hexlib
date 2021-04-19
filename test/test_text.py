@@ -146,3 +146,20 @@ class TestText(TestCase):
         expected = "hello world it's it's"
 
         self.assertEqual(cleaned, expected)
+
+    def test_html_11(self):
+        text = "<div>\n Hello, \t\n<strong>world! it's it`s u & | </strong>\n\t</div>"
+        cleaned = clean(
+            text,
+            clean_html=True,
+            lowercase=True,
+            remove_punctuation=True,
+            strip=True,
+            lemmatize=True,
+            fix_single_quotes=True,
+            remove_stopwords_en=True,
+            remove_urls=True
+        )
+        expected = "hello world"
+
+        self.assertEqual(cleaned, expected)

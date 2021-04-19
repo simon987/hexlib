@@ -43,7 +43,7 @@ def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuati
 
     if clean_html:
         try:
-            root = etree.fromstring(text)
+            root = etree.fromstring(text.replace("&", ""))
             text = "".join(get_text(root))
         except:
             pass
