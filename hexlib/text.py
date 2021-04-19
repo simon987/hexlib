@@ -1,5 +1,5 @@
 from functools import partial
-from multiprocessing.pool import ThreadPool
+from multiprocessing.pool import Pool
 
 import nltk.corpus
 from lxml import etree
@@ -18,8 +18,8 @@ nltk.download("wordnet", quiet=True)
 lemmatizer = WordNetLemmatizer()
 
 
-def clean_multithread(texts, processes, **kwargs):
-    pool = ThreadPool(processes=processes)
+def clean_multicore(texts, processes, **kwargs):
+    pool = Pool(processes=processes)
     return pool.map(
         func=partial(clean, **kwargs),
         iterable=texts,
