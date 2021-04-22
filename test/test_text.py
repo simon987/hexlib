@@ -148,7 +148,7 @@ class TestText(TestCase):
         self.assertEqual(cleaned, expected)
 
     def test_html_11(self):
-        text = "<div>\n Hello, \t\n<strong>world! it's it`s u & | </strong>\n\t</div>"
+        text = "<div>\n Hello, \t\n<strong>world! it's it`s u us & | </strong>\n\t</div>"
         cleaned = clean(
             text,
             clean_html=True,
@@ -161,5 +161,20 @@ class TestText(TestCase):
             remove_urls=True
         )
         expected = "hello world"
+
+        self.assertEqual(cleaned, expected)
+
+    def test_bigrams(self):
+        text = "x A b c d e f g h"
+        cleaned = clean(
+            text,
+            lowercase=True,
+            bigrams={
+                ("a", "b"),
+                ("c", "d"),
+                ("f", "g"),
+            }
+        )
+        expected = "x a_b c_d e f_g h"
 
         self.assertEqual(cleaned, expected)

@@ -32,9 +32,22 @@ def clean_multicore(texts, processes, **kwargs):
     )
 
 
+def _transform_bigram(ngram_seq, ngrams):
+    for ngram in ngram_seq:
+        if ngram in ngrams:
+            yield "_".join(ngram)
+
+            ngram_seq.__next__()
+        else:
+            yield ngram[0]
+
+
 def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
           remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
-          remove_urls=False):
+          remove_urls=False, bigrams: set = None):
+    if lowercase:
+        text = text.lower()
+
     if fix_single_quotes:
         text = text.replace("`", "'")
 
@@ -51,15 +64,17 @@ def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuati
     if remove_punctuation:
         text = PUNCTUATION_RE.sub(" ", text)
 
-    if lowercase:
-        text = text.lower()
-
     if not remove_stopwords_en or not lemmatize or not strip_quotes:
         text = WHITESPACE_RE.sub(" ", text)
 
     if strip_quotes:
         words = WHITESPACE_RE.split(text)
         text = " ".join(w.strip("\"'") for w in words)
+
+    if bigrams:
+        words = WHITESPACE_RE.split(text)
+        words.append("*")
+        text = " ".join(_transform_bigram(nltk.bigrams(words), bigrams))
 
     if remove_stopwords_en or lemmatize:
         words = WHITESPACE_RE.split(text)
