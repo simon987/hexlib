@@ -17,8 +17,7 @@ def get_redis():
     )
 
 
-def redis_publish(rdb, item, item_project,  item_type, item_subproject=None, item_category="x"):
-
+def redis_publish(rdb, item, item_project, item_type, item_subproject=None, item_category="x"):
     item_project = item_project.replace(".", "-")
     item_subproject = item_subproject.replace(".", "-") if item_subproject else None
 
@@ -38,7 +37,7 @@ def redis_publish(rdb, item, item_project,  item_type, item_subproject=None, ite
 def get_web(session=None):
     ua = UserAgent()
 
-    return Web(
+    web = Web(
         session=session,
         proxy=os.environ.get("PROXY", None),
         rps=os.environ.get("RPS", 1),
@@ -49,3 +48,12 @@ def get_web(session=None):
         retry_sleep=int(os.environ.get("RETRY_SLEEP", 0)),
         ua=ua[os.environ.get("USER_AGENT")] if os.environ.get("USER_AGENT", None) is not None else None
     )
+
+    if hasattr(web._session, "cipherSuite"):
+        stdout_logger.debug("Web>cipherSuite=%s" % web._session.cipherSuite)
+    if hasattr(web._session, "headers"):
+        stdout_logger.debug("Web>headers=%s" % web._session.headers)
+
+    stdout_logger.debug("Web>rps=%s" % os.environ.get("RPS", 1))
+
+    return web
