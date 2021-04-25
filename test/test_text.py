@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from hexlib.text import clean
+from hexlib.text import preprocess
 
 
 class TestText(TestCase):
 
     def test_html_invalid(self):
         text = ""
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
         )
@@ -17,7 +17,7 @@ class TestText(TestCase):
 
     def test_html_1(self):
         text = "<div>Hello, <strong>world</strong></div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
         )
@@ -27,7 +27,7 @@ class TestText(TestCase):
 
     def test_html_2(self):
         text = "<div>Hello, <strong>world</strong></div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True
@@ -38,7 +38,7 @@ class TestText(TestCase):
 
     def test_html_3(self):
         text = "<div>\n Hello, \t\n<strong> world    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -49,7 +49,7 @@ class TestText(TestCase):
 
     def test_html_4(self):
         text = "<div>\n Hello, \t\n<strong> world    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -61,7 +61,7 @@ class TestText(TestCase):
 
     def test_html_5(self):
         text = "<div>\n Hello, \t\n<strong> world    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -74,7 +74,7 @@ class TestText(TestCase):
 
     def test_html_6(self):
         text = "<div>\n Hello, \t\n<strong>a the world    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -88,7 +88,7 @@ class TestText(TestCase):
 
     def test_html_7(self):
         text = "<div>\n Hello, \t\n<strong>a the worlds    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -103,7 +103,7 @@ class TestText(TestCase):
 
     def test_html_8(self):
         text = "<div>\n Hello, \t\n<strong>a the worlds!    </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -118,7 +118,7 @@ class TestText(TestCase):
 
     def test_html_9(self):
         text = "<div>\n Hello, \t\n<strong>world! it's it`s   </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -133,7 +133,7 @@ class TestText(TestCase):
 
     def test_html_10(self):
         text = "<div>\n Hello, \t\n<strong>world! it's it`s https://google.ca/test/abc.pdf  </strong>\n\t</div>"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -148,8 +148,8 @@ class TestText(TestCase):
         self.assertEqual(cleaned, expected)
 
     def test_html_11(self):
-        text = "<div>\n Hello, \t\n<strong>world! it's it`s u us & | </strong>\n\t</div>"
-        cleaned = clean(
+        text = "<div>\n Hello, \t\n<strong>world! it's it`s & | </strong>\n\t</div>"
+        cleaned = preprocess(
             text,
             clean_html=True,
             lowercase=True,
@@ -166,7 +166,7 @@ class TestText(TestCase):
 
     def test_bigrams(self):
         text = "x A b c d e f g h"
-        cleaned = clean(
+        cleaned = preprocess(
             text,
             lowercase=True,
             bigrams={

@@ -5,6 +5,8 @@ from datetime import datetime
 from base64 import b64encode, b64decode
 from http.cookiejar import Cookie
 from time import time
+from urllib.parse import urlparse, parse_qs
+
 from bs4 import BeautifulSoup
 
 import requests
@@ -79,6 +81,18 @@ def cookiejar_filter(cj, pattern):
     return filtered_cj
 
 
+def url_query_value(url, arg, as_list=False):
+    qs = urlparse(url).query
+    parsed_qs = parse_qs(qs)
+
+    arg = parsed_qs.get(arg, [])
+
+    if as_list:
+        return arg if arg else []
+    else:
+        return arg[0] if arg else None
+
+
 def download_file(url, destination, session=None, headers=None, overwrite=False, retries=1, err_cb=None,
                   save_meta=False):
     if os.path.exists(destination) and not overwrite:
@@ -112,7 +126,8 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
 
 
 class Web:
-    def __init__(self, proxy=None, rps=1, retries=3, retry_sleep=0, logger=None, cookie_file=None, retry_codes=None, session=None,
+    def __init__(self, proxy=None, rps=1, retries=3, retry_sleep=0, logger=None, cookie_file=None, retry_codes=None,
+                 session=None,
                  ua=None):
         self._cookie_file = cookie_file
         self._proxy = proxy

@@ -53,6 +53,8 @@ def get_web(session=None):
         stdout_logger.debug("Web>cipherSuite=%s" % web._session.cipherSuite)
     if hasattr(web._session, "headers"):
         stdout_logger.debug("Web>headers=%s" % web._session.headers)
+    if hasattr(web._session, "cookies"):
+        stdout_logger.debug("Web>cookies=%s" % web._session.cookies)
 
     stdout_logger.debug("Web>rps=%s" % os.environ.get("RPS", 1))
 

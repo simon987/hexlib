@@ -27,7 +27,7 @@ lemmatizer = WordNetLemmatizer()
 def clean_multicore(texts, processes, **kwargs):
     pool = Pool(processes=processes)
     return pool.map(
-        func=partial(clean, **kwargs),
+        func=partial(preprocess, **kwargs),
         iterable=texts,
     )
 
@@ -42,9 +42,9 @@ def _transform_bigram(ngram_seq, ngrams):
             yield ngram[0]
 
 
-def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
-          remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
-          remove_urls=False, bigrams: set = None):
+def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
+               remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
+               remove_urls=False, bigrams: set = None):
     if lowercase:
         text = text.lower()
 
@@ -64,20 +64,19 @@ def clean(text, lowercase=False, clean_html=False, strip=False, remove_punctuati
     if remove_punctuation:
         text = PUNCTUATION_RE.sub(" ", text)
 
-    if not remove_stopwords_en or not lemmatize or not strip_quotes:
-        text = WHITESPACE_RE.sub(" ", text)
+    text = WHITESPACE_RE.sub(" ", text)
 
     if strip_quotes:
-        words = WHITESPACE_RE.split(text)
+        words = text.split(" ")
         text = " ".join(w.strip("\"'") for w in words)
 
     if bigrams:
-        words = WHITESPACE_RE.split(text)
+        words = text.split(" ")
         words.append("*")
         text = " ".join(_transform_bigram(nltk.bigrams(words), bigrams))
 
     if remove_stopwords_en or lemmatize:
-        words = WHITESPACE_RE.split(text)
+        words = text.split(" ")
 
         if lemmatize and remove_stopwords_en:
             text = " ".join(lemmatizer.lemmatize(w) for w in words if w not in stop_words_en)
