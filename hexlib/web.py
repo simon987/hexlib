@@ -192,4 +192,4 @@ class Web:
         r = self.get(url, **kwargs)
         if not r:
             return None
-        return BeautifulSoup(r.content, "html.parser")
+        return BeautifulSoup(r.content.decode("utf-8"), "html.parser")
