@@ -56,6 +56,8 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
 
     if clean_html:
         try:
+            text = "<root>" + text + "</root>"
+
             parser = etree.XMLParser(recover=True)
             root = etree.fromstring(text, parser)
 
