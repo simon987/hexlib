@@ -165,7 +165,7 @@ class TestText(TestCase):
         self.assertEqual(cleaned, expected)
 
     def test_html_no_root(self):
-        text = "<a href=\"#p217709510\" class=\"quotelink\">&gt;&gt;217709510</a><br>Is there a servant that is against civilization and humanity?<br>Literally instant summon."
+        text = "<a href=\"#p217709510\" class=\"quotelink\">&gt;&gt;217709510</a><br>Is there a<wbr>servant that is against civilization and humanity?<br>Literally instant summon."
         
         cleaned = preprocess(
             text,
@@ -180,6 +180,24 @@ class TestText(TestCase):
         )
         
         expected = "217709510 is there a servant that is against civilization and humanity literally instant summon"
+        
+
+    def test_html_invalid_attribute(self):
+        text = '<root><iframe width="560" height="315" src=" " title="youtube video player" frameborder="0" allowfullscreen></iframe></root>'
+
+        cleaned = preprocess(
+            text,
+            clean_html=True,
+            lowercase=True,
+            remove_punctuation=True,
+            strip=True,
+            lemmatize=False,
+            fix_single_quotes=True,
+            remove_stopwords_en=False,
+            remove_urls=False
+        )
+
+        expected = ""
 
         self.assertEqual(cleaned, expected)
 

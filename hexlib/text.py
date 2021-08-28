@@ -56,16 +56,11 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
 
     if clean_html:
         try:
-            text = XML_ENTITY_RE.sub(" ", text)
-            text = text.replace("&", " ")
-            text = text.replace("<br>", "<br/>")
-            text = "<root>" + text + "</root>"
-
-            root = etree.fromstring(text)
+            parser = etree.XMLParser(recover=True)
+            root = etree.fromstring(text, parser)
 
             text = " ".join(get_text(root))
-        except Exception as e:
-            raise e
+        except:
             pass
 
     if remove_punctuation:
