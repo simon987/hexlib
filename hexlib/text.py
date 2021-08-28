@@ -6,7 +6,7 @@ from lxml import etree
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-from .regex import WHITESPACE_RE, PUNCTUATION_RE, LINK_RE
+from .regex import WHITESPACE_RE, PUNCTUATION_RE, LINK_RE, XML_ENTITY_RE
 
 get_text = etree.XPath("//text()")
 
@@ -56,9 +56,16 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
 
     if clean_html:
         try:
-            root = etree.fromstring(text.replace("&", ""))
-            text = "".join(get_text(root))
-        except:
+            text = XML_ENTITY_RE.sub(" ", text)
+            text = text.replace("&", " ")
+            text = text.replace("<br>", "<br/>")
+            text = "<root>" + text + "</root>"
+
+            root = etree.fromstring(text)
+
+            text = " ".join(get_text(root))
+        except Exception as e:
+            raise e
             pass
 
     if remove_punctuation:
