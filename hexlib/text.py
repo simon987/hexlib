@@ -44,7 +44,7 @@ def _transform_bigram(ngram_seq, ngrams):
 
 def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
                remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
-               remove_urls=False, bigrams: set = None):
+               remove_urls=False, bigrams: set = None, remove_numbers=False):
     if lowercase:
         text = text.lower()
 
@@ -79,9 +79,14 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
         words.append("*")
         text = " ".join(_transform_bigram(nltk.bigrams(words), bigrams))
 
-    if remove_stopwords_en or lemmatize:
+    if remove_stopwords_en or lemmatize or remove_numbers:
         words = text.split(" ")
 
+        if remove_numbers:
+            words = filter(lambda w: not w.isnumeric(), words)
+
+        if not lemmatize and not remove_stopwords_en:
+            text = " ".join(words)
         if lemmatize and remove_stopwords_en:
             text = " ".join(lemmatizer.lemmatize(w) for w in words if w not in stop_words_en)
         elif not lemmatize and remove_stopwords_en:

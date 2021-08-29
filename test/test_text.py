@@ -233,3 +233,14 @@ class TestText(TestCase):
         expected = "x a_b c_d e f_g h"
 
         self.assertEqual(cleaned, expected)
+
+    def test_remove_numbers(self):
+        text = "Hello1 test1124test 12 1 1111111 world"
+        cleaned = preprocess(
+            text,
+            lowercase=True,
+            remove_numbers=True
+        )
+        expected = "hello1 test1124test world"
+
+        self.assertEqual(cleaned, expected)
