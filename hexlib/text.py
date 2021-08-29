@@ -24,11 +24,12 @@ nltk.download("wordnet", quiet=True)
 lemmatizer = WordNetLemmatizer()
 
 
-def clean_multicore(texts, processes, **kwargs):
+def clean_multicore(texts, processes, chunk_size=10000, **kwargs):
     pool = Pool(processes=processes)
-    return pool.map(
+    yield from pool.imap(
         func=partial(preprocess, **kwargs),
         iterable=texts,
+        chunksize=chunk_size
     )
 
 
