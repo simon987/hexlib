@@ -130,6 +130,17 @@ class TestText(TestCase):
         expected = "hello world it's it's"
 
         self.assertEqual(cleaned, expected)
+    
+    def test_single_quote(self):
+        text = "it's it`s it’s"
+        cleaned = preprocess(
+            text,
+            lowercase=True,
+            fix_single_quotes=True
+        )
+        expected = "it's it's it's"
+
+        self.assertEqual(cleaned, expected)
 
     def test_html_10(self):
         text = "<div>\n Hello, \t\n<strong>world! it's it`s https://google.ca/test/abc.pdf  </strong>\n\t</div>"

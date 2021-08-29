@@ -51,6 +51,7 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
 
     if fix_single_quotes:
         text = text.replace("`", "'")
+        text = text.replace("’", "'")
 
     if remove_urls:
         text = LINK_RE.sub(" ", text)
