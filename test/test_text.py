@@ -245,6 +245,20 @@ class TestText(TestCase):
 
         self.assertEqual(cleaned, expected)
 
+    def test_trigrams(self):
+        text = "x A b c d e f g h"
+        cleaned = preprocess(
+            text,
+            lowercase=True,
+            trigrams={
+                ("a", "b", "c"),
+                ("e", "f", "g"),
+            }
+        )
+        expected = "x a_b_c d e_f_g h"
+
+        self.assertEqual(cleaned, expected)
+
     def test_remove_numbers(self):
         text = "Hello1 test1124test 12 1 1111111 world"
         cleaned = preprocess(

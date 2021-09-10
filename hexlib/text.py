@@ -43,9 +43,20 @@ def _transform_bigram(ngram_seq, ngrams):
             yield ngram[0]
 
 
+def _transform_trigram(ngram_seq, ngrams):
+    for ngram in ngram_seq:
+        if ngram in ngrams:
+            yield "_".join(ngram)
+
+            ngram_seq.__next__()
+            ngram_seq.__next__()
+        else:
+            yield ngram[0]
+
+
 def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
                remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
-               remove_urls=False, bigrams: set = None, remove_numbers=False):
+               remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False):
     if lowercase:
         text = text.lower()
 
@@ -80,6 +91,12 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
         words = text.split(" ")
         words.append("*")
         text = " ".join(_transform_bigram(nltk.bigrams(words), bigrams))
+
+    if trigrams:
+        words = text.split(" ")
+        words.append("*")
+        words.append("*")
+        text = " ".join(_transform_trigram(nltk.trigrams(words), trigrams))
 
     if remove_stopwords_en or lemmatize or remove_numbers:
         words = text.split(" ")
