@@ -60,7 +60,7 @@ SINGLE_QUOTES = ("’", "`")
 SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", len(SINGLE_QUOTES))))
 
 PUNCTUATION = ".,;:\"!?/()|*=>"
-PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, len(PUNCTUATION))
+PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, " " * len(PUNCTUATION))
 
 
 def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_stopwords_en=False,

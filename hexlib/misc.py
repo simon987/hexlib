@@ -1,4 +1,5 @@
 import atexit
+import itertools
 import os
 import sys
 import time
@@ -31,6 +32,15 @@ def retry(attempts, callback=None, retry_sleep=0):
 def chunks(lst: list, chunk_len: int):
     for i in range(0, len(lst), chunk_len):
         yield lst[i:i + chunk_len]
+
+
+def ichunks(iterable, chunk_len: int):
+    it = iter(iterable)
+    while True:
+        chunk = tuple(itertools.islice(it, chunk_len))
+        if not chunk:
+            break
+        yield chunk
 
 
 def rate_limit(per_second):
