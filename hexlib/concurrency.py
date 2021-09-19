@@ -13,13 +13,16 @@ class StatefulStreamWorker:
 
     def run(self, q: Queue):
         for chunk in queue_iter(q, joinable=False, timeout=3):
-            self.process_chunk(chunk)
+            self._process_chunk(chunk)
 
-    def process_chunk(self, chunk):
+    def _process_chunk(self, chunk):
         for item in chunk:
             self.process(item)
 
     def process(self, item) -> None:
+        raise NotImplementedError
+
+    def results(self):
         raise NotImplementedError
 
 
