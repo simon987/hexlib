@@ -1,10 +1,27 @@
 from timeit import timeit
 
-if __name__ == '__main__':
+t = bytes.maketrans(b".,;:\"!?/()|*=>", b"              ")
 
+
+def translate(x: str):
+    arr = x.encode("utf8")
+
+    return arr.translate(t).decode("utf8")
+
+
+if __name__ == '__main__':
     res = timeit(
-        setup="from hexlib.text import preprocess",
-        stmt='text = "x A b c d e f g h"\ncleaned = preprocess(\n    text,\n    lowercase=True,\n    trigrams={\n        ("a", "b", "c"),\n        ("e", "f", "g"),\n    }\n)'
+        setup='t = str.maketrans(".,;:\\"!?/()|*=>", "              ")',
+        stmt='x = "Hello, world %123 & *".translate(t)'
     )
 
-    print(res)
+    # 0.865953s
+    print("translate = %fs" % res)
+
+    res = timeit(
+        setup='from text import translate',
+        stmt='x = translate("Hello, world %123 & *")'
+    )
+
+    # 0.865953s
+    print("custom = %fs" % res)

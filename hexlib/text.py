@@ -59,6 +59,9 @@ def _transform_trigram(ngram_seq, ngrams):
 SINGLE_QUOTES = ("’", "`")
 SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", len(SINGLE_QUOTES))))
 
+PUNCTUATION = ".,;:\"!?/()|*=>"
+PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, len(PUNCTUATION))
+
 
 def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_stopwords_en=False,
                lemmatize=False, fix_single_quotes=False, strip_quotes=False, remove_urls=False, bigrams: set = None,
@@ -84,9 +87,9 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
             pass
 
     if remove_punctuation:
-        text = PUNCTUATION_RE.sub(" ", text)
+        text = text.translate(PUNCTUATION_TRANS)
 
-    words = WHITESPACE_RE.sub(" ", text).split(" ")
+    words = text.split()
 
     if strip_quotes:
         words = filter(lambda w: w.strip("\"'"), words)
