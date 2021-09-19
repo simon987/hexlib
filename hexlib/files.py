@@ -62,6 +62,16 @@ COMPRESSION_GZIP = "gz"
 COMPRESSION_ZSTD = "zstd"
 
 
+class NDJsonLine:
+    __slots__ = "text"
+
+    def __init__(self, text):
+        self.text = text
+
+    def json(self):
+        return json.loads(self.text)
+
+
 def ndjson_iter(*files, compression=""):
     for file in files:
         cleanup = None
@@ -90,7 +100,6 @@ def ndjson_iter(*files, compression=""):
                 line_iter.close()
 
         for line in line_iter:
-            yield json.loads(line)
+            yield NDJsonLine(line)
         if cleanup:
             cleanup()
-

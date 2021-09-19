@@ -1,4 +1,5 @@
 from functools import partial
+from itertools import chain, repeat
 from multiprocessing.pool import Pool
 
 import nltk.corpus
@@ -36,9 +37,9 @@ def clean_multicore(texts, processes, chunk_size=10000, **kwargs):
 def _transform_bigram(ngram_seq, ngrams):
     for ngram in ngram_seq:
         if ngram in ngrams:
-            yield "_".join(ngram)
+            yield ngram[0] + "_" + ngram[1]
 
-            ngram_seq.__next__()
+            next(ngram_seq)
         else:
             yield ngram[0]
 
@@ -46,23 +47,27 @@ def _transform_bigram(ngram_seq, ngrams):
 def _transform_trigram(ngram_seq, ngrams):
     for ngram in ngram_seq:
         if ngram in ngrams:
+            # yield ngram[0] + "_" + ngram[1] + "_" + ngram[2]
             yield "_".join(ngram)
 
-            ngram_seq.__next__()
-            ngram_seq.__next__()
+            next(ngram_seq)
+            next(ngram_seq)
         else:
             yield ngram[0]
 
 
-def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punctuation=False,
-               remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
-               remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False):
+SINGLE_QUOTES = ("’", "`")
+SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", len(SINGLE_QUOTES))))
+
+
+def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_stopwords_en=False,
+               lemmatize=False, fix_single_quotes=False, strip_quotes=False, remove_urls=False, bigrams: set = None,
+               trigrams: set = None, remove_numbers=False):
     if lowercase:
         text = text.lower()
 
     if fix_single_quotes:
-        text = text.replace("`", "'")
-        text = text.replace("’", "'")
+        text = text.translate(SINGLE_QUOTE_TRANS)
 
     if remove_urls:
         text = LINK_RE.sub(" ", text)
@@ -81,39 +86,24 @@ def preprocess(text, lowercase=False, clean_html=False, strip=False, remove_punc
     if remove_punctuation:
         text = PUNCTUATION_RE.sub(" ", text)
 
-    text = WHITESPACE_RE.sub(" ", text)
+    words = WHITESPACE_RE.sub(" ", text).split(" ")
 
     if strip_quotes:
-        words = text.split(" ")
-        text = " ".join(w.strip("\"'") for w in words)
+        words = filter(lambda w: w.strip("\"'"), words)
 
     if bigrams:
-        words = text.split(" ")
-        words.append("*")
-        text = " ".join(_transform_bigram(nltk.bigrams(words), bigrams))
+        words = _transform_bigram(nltk.bigrams(chain(words, ("*",))), bigrams)
 
     if trigrams:
-        words = text.split(" ")
-        words.append("*")
-        words.append("*")
-        text = " ".join(_transform_trigram(nltk.trigrams(words), trigrams))
+        words = _transform_trigram(nltk.trigrams(chain(words, ("*", "*"))), trigrams)
 
-    if remove_stopwords_en or lemmatize or remove_numbers:
-        words = text.split(" ")
+    if remove_numbers:
+        words = filter(lambda w: not w.isnumeric(), words)
 
-        if remove_numbers:
-            words = filter(lambda w: not w.isnumeric(), words)
+    if lemmatize:
+        words = map(lambda w: lemmatizer.lemmatize(w), words)
 
-        if not lemmatize and not remove_stopwords_en:
-            text = " ".join(words)
-        if lemmatize and remove_stopwords_en:
-            text = " ".join(lemmatizer.lemmatize(w) for w in words if w not in stop_words_en)
-        elif not lemmatize and remove_stopwords_en:
-            text = " ".join(w for w in words if w not in stop_words_en)
-        elif lemmatize and not remove_stopwords_en:
-            text = " ".join(lemmatizer.lemmatize(w) for w in words)
+    if remove_stopwords_en:
+        words = filter(lambda w: w not in stop_words_en, words)
 
-    if strip:
-        text = text.strip()
-
-    return text
+    return filter(lambda w: w != "", words)
