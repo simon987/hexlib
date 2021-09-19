@@ -12,7 +12,7 @@ class StatefulStreamWorker:
         pass
 
     def run(self, q: Queue):
-        for chunk in queue_iter(q, timeout=3):
+        for chunk in queue_iter(q, joinable=False, timeout=3):
             self.process_chunk(chunk)
 
     def process_chunk(self, chunk):
