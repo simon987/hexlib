@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hexlib",
-    version="1.55",
+    version="1.56",
     description="Misc utility methods",
     author="simon987",
     author_email="me@simon987.net",
