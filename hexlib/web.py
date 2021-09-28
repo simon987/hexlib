@@ -166,6 +166,18 @@ class Web:
 
         self._get = get
 
+        @rate_limit(rps)
+        @retry(retries, callback=self._error_callback, retry_sleep=retry_sleep)
+        def post(url, **kwargs):
+            self._current_req = "POST", url, kwargs
+            r = self._session.post(url, **kwargs)
+
+            if r.status_code in self._retry_codes:
+                raise Exception(f"HTTP {r.status_code}")
+            return r
+
+        self._post = post
+
     def _error_callback(self, e):
         self._logger.critical(f"{self._format_url(*self._current_req)}: {e}")
 
@@ -186,6 +198,18 @@ class Web:
 
         if self._logger and r is not None:
             self._logger.debug(self._format_url("GET", url, kwargs, r) + " %.2fs" % (time() - time_start))
+        return r
+
+    def post(self, url, **kwargs):
+
+        time_start = time()
+        r = self._post(url, **kwargs)
+
+        if self._cookie_file:
+            save_cookiejar(self._session.cookies, self._cookie_file)
+
+        if self._logger and r is not None:
+            self._logger.debug(self._format_url("POST", url, kwargs, r) + " %.2fs" % (time() - time_start))
         return r
 
     def get_soup(self, url, **kwargs):
