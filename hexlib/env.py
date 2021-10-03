@@ -37,13 +37,15 @@ def redis_publish(rdb, item, item_project, item_type, item_subproject=None, item
 def get_web(session=None):
     ua = UserAgent()
 
+    retry_codes = os.environ.get("RETRY_CODES", "")
+
     web = Web(
         session=session,
         proxy=os.environ.get("PROXY", None),
         rps=os.environ.get("RPS", 1),
         logger=stdout_logger,
         cookie_file=os.environ.get("COOKIE_FILE", None),
-        retry_codes=set(int(x) if x else None for x in os.environ.get("RETRY_CODES", "").split(",")),
+        retry_codes=set(int(x) for x in retry_codes) if retry_codes else None,
         retries=int(os.environ.get("RETRIES", 3)),
         retry_sleep=int(os.environ.get("RETRY_SLEEP", 0)),
         ua=ua[os.environ.get("USER_AGENT")] if os.environ.get("USER_AGENT", None) is not None else None
