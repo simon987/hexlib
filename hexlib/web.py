@@ -81,6 +81,14 @@ def cookiejar_filter(cj, pattern):
     return filtered_cj
 
 
+def cookiejar_filter_name(cj, pattern):
+    filtered_cj = RequestsCookieJar()
+    for c in cj:
+        if re.match(pattern, c.name):
+            filtered_cj.set_cookie(c)
+    return filtered_cj
+
+
 def url_query_value(url, arg, as_list=False):
     qs = urlparse(url).query
     parsed_qs = parse_qs(qs)
