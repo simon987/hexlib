@@ -1,9 +1,14 @@
 from unittest import TestCase
 
 from hexlib.db import VolatileState, VolatileBooleanState, VolatileQueue
+from hexlib.env import get_redis
 
 
 class TestVolatileState(TestCase):
+
+    def setUp(self) -> None:
+        rdb = get_redis()
+        rdb.delete("test1a", "test1b", "test1c", "test1:a", "test2b")
 
     def test_get_set(self):
         s = VolatileState(prefix="test1")
@@ -52,6 +57,10 @@ class TestVolatileState(TestCase):
 
 
 class TestVolatileBoolState(TestCase):
+
+    def setUp(self) -> None:
+        rdb = get_redis()
+        rdb.delete("test1a", "test1b", "test1c", "test1:a", "test2b")
 
     def test_get_set(self):
         s = VolatileBooleanState(prefix="test1")

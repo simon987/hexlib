@@ -14,6 +14,7 @@ setup(
     install_requires=[
         "ImageHash", "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
         "u-msgpack-python", "psycopg2-binary", "bs4", "lxml", "nltk", "numpy",
-        "matplotlib", "scikit-learn", "fake-useragent @ git+git://github.com/Jordan9675/fake-useragent"
+        "matplotlib", "scikit-learn", "fake-useragent @ git+git://github.com/Jordan9675/fake-useragent",
+        "requests"
     ]
 )

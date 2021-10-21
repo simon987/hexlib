@@ -2,3 +2,6 @@
 .idea/
 *.db
 *.png
+hexlib.egg-info
+build/
+dist/

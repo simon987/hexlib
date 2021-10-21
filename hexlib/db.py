@@ -36,6 +36,9 @@ class VolatileState:
     def __getitem__(self, table):
         return RedisTable(self, table, self._sep)
 
+    def __delitem__(self, key):
+        self.rdb.delete(f"{self.prefix}{self._sep}{key}")
+
 
 class VolatileQueue:
     """Quick and dirty volatile queue-like redis wrapper"""
@@ -68,6 +71,9 @@ class VolatileBooleanState:
     def __getitem__(self, table):
         return RedisBooleanTable(self, table, self._sep)
 
+    def __delitem__(self, table):
+        self.rdb.delete(f"{self.prefix}{self._sep}{table}")
+
 
 class RedisTable:
     def __init__(self, state, table, sep=""):
@@ -89,9 +95,9 @@ class RedisTable:
         self._state.rdb.hdel(self._key, str(key))
 
     def __iter__(self):
-        val = self._state.rdb.hgetall(self._key)
-        if val:
-            return ((k, umsgpack.loads(v)) for k, v in val.items())
+        for val in self._state.rdb.hscan(self._key):
+            if val:
+                return ((k, umsgpack.loads(v)) for k, v in val.items())
 
 
 class RedisBooleanTable:
@@ -114,7 +120,7 @@ class RedisBooleanTable:
         self._state.rdb.srem(self._key, str(key))
 
     def __iter__(self):
-        return iter(self._state.rdb.smembers(self._key))
+        yield from self._state.rdb.sscan_iter(self._key)
 
 
 class Table:
