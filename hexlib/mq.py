@@ -1,10 +1,39 @@
 import json
+from collections import namedtuple
 from functools import partial
 from itertools import islice
 from time import sleep, time
 
 from orjson import orjson
 from redis import Redis
+
+RoutingKeyParts = namedtuple(
+    "RoutingKeyParts",
+    ["arc_list", "project", "subproject", "type", "category"]
+)
+
+
+def parse_routing_key(key):
+    tokens = key.split(".")
+
+    if len(tokens) == 4:
+        arc_list, project, type_, category = tokens
+        return RoutingKeyParts(
+            arc_list=arc_list,
+            project=project,
+            subproject=None,
+            type=type_,
+            category=category
+        )
+    else:
+        arc_list, project, subproject, type_, category = tokens
+        return RoutingKeyParts(
+            arc_list=arc_list,
+            project=project,
+            subproject=subproject,
+            type=type_,
+            category=category
+        )
 
 
 class MessageQueue:
