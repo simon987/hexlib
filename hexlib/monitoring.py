@@ -1,22 +1,29 @@
-import logging
 import traceback
+from abc import ABC
 
 from influxdb import InfluxDBClient
 
 from hexlib.misc import buffered
 
 
-class Monitoring:
-    def __init__(self, db, host="localhost", logger=logging.getLogger("default"), batch_size=1, flush_on_exit=False):
-        self._db = db
-        self._client = InfluxDBClient(host, 8086, "", "", db)
+class Monitoring(ABC):
+    def log(self, points):
+        raise NotImplementedError()
+
+
+class BufferedInfluxDBMonitoring(Monitoring):
+    def __init__(self, db_name, host="localhost", port=8086, logger=None, batch_size=1, flush_on_exit=False):
+        self._db = db_name
+        self._client = InfluxDBClient(host, port, "", "", db_name)
         self._logger = logger
 
-        self._init()
+        if not self.db_exists(self._db):
+            self._client.create_database(self._db)
 
         @buffered(batch_size, flush_on_exit)
         def log(points):
             self._log(points)
+
         self.log = log
 
     def db_exists(self, name):
@@ -25,14 +32,16 @@ class Monitoring:
                 return True
         return False
 
-    def _init(self):
-        if not self.db_exists(self._db):
-            self._client.create_database(self._db)
+    def log(self, points):
+        # Is overwritten in __init__()
+        pass
 
     def _log(self, points):
         try:
             self._client.write_points(points)
-            self._logger.debug("InfluxDB: Wrote %d points" % len(points))
+            if self._logger:
+                self._logger.debug("InfluxDB: Wrote %d points" % len(points))
         except Exception as e:
-            self._logger.debug(traceback.format_exc())
-            self._logger.error(str(e))
+            if self._logger:
+                self._logger.debug(traceback.format_exc())
+                self._logger.error(str(e))

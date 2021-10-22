@@ -126,6 +126,7 @@ def download_file(url, destination, session=None, headers=None, overwrite=False,
                         "url": url,
                         "timestamp": datetime.utcnow().replace(microsecond=0).isoformat()
                     }))
+            r.close()
             break
         except Exception as e:
             if err_cb:
@@ -142,7 +143,7 @@ class Web:
         self._logger = logger
         self._current_req = None
         if retry_codes is None or not retry_codes:
-            retry_codes = {502, 504, 520, 522, 524, 429}
+            retry_codes = {500, 502, 504, 520, 522, 524, 429}
         self._retry_codes = retry_codes
 
         if session is None:
