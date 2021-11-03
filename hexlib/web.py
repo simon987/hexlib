@@ -188,7 +188,8 @@ class Web:
         self._post = post
 
     def _error_callback(self, e):
-        self._logger.critical(f"{self._format_url(*self._current_req)}: {e}")
+        if self._logger:
+            self._logger.critical(f"{self._format_url(*self._current_req)}: {e}")
 
     def _format_url(self, method, url, kwargs, r=None):
         if "params" in kwargs and kwargs["params"]:
