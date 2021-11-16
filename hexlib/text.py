@@ -59,6 +59,9 @@ def _transform_trigram(ngram_seq, ngrams):
 SINGLE_QUOTES = ("’", "`")
 SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", len(SINGLE_QUOTES))))
 
+DASHES = ("–", "⸺", "–")
+DASHES_TRANS = str.maketrans("".join(DASHES), "".join(repeat("-", len(DASHES))))
+
 PUNCTUATION = ".,;:\"!?/()|*=>"
 PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, " " * len(PUNCTUATION))
 
@@ -71,6 +74,8 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
 
     if fix_single_quotes:
         text = text.translate(SINGLE_QUOTE_TRANS)
+
+    text = text.translate(DASHES_TRANS)
 
     if remove_urls:
         text = LINK_RE.sub(" ", text)
