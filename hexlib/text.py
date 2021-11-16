@@ -56,7 +56,7 @@ def _transform_trigram(ngram_seq, ngrams):
             yield ngram[0]
 
 
-SINGLE_QUOTES = ("’", "`")
+SINGLE_QUOTES = ("’", "`", "‘")
 SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", len(SINGLE_QUOTES))))
 
 DASHES = ("–", "⸺", "–", "—")
