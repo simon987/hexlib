@@ -247,3 +247,13 @@ class TestText(TestCase):
         expected = "hello1 test1124test world"
 
         self.assertEqual(" ".join(cleaned), expected)
+
+    def test_strip_quotes(self):
+        text = "'hi' “test” 'hello\""
+        cleaned = preprocess(
+            text,
+            strip_quotes=True
+        )
+        expected = "hi test hello"
+
+        self.assertEqual(" ".join(cleaned), expected)

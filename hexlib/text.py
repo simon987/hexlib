@@ -97,7 +97,7 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
     words = text.split()
 
     if strip_quotes:
-        words = filter(lambda w: w.strip("\"'“"), words)
+        words = map(lambda w: w.strip("\"'“”"), words)
 
     if bigrams:
         words = _transform_bigram(nltk.bigrams(chain(words, ("*",))), bigrams)
