@@ -120,7 +120,7 @@ class RedisMQ(MessageQueue):
             task_json = orjson.loads(task)
             topic = topic.decode()
 
-            if "_id" not in task_json:
+            if "_id" not in task_json or not task_json["_id"]:
                 raise ValueError(f"Task doesn't have _id field: {task}")
 
             # Immediately put in pending queue
