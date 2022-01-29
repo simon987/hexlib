@@ -85,7 +85,7 @@ def ndjson_iter(*files, compression=""):
                 line_iter = BufferedReader(gzip.open(file))
         elif compression == COMPRESSION_ZSTD:
             fp = open(file, "rb")
-            dctx = zstandard.ZstdDecompressor()
+            dctx = zstandard.ZstdDecompressor(max_window_size=2147483648)
             reader = dctx.stream_reader(fp)
             line_iter = BufferedReader(reader)
 
