@@ -25,15 +25,6 @@ nltk.download("wordnet", quiet=True)
 lemmatizer = WordNetLemmatizer()
 
 
-def clean_multicore(texts, processes, chunk_size=10000, **kwargs):
-    pool = Pool(processes=processes)
-    yield from pool.imap(
-        func=partial(preprocess, **kwargs),
-        iterable=texts,
-        chunksize=chunk_size
-    )
-
-
 def _transform_bigram(ngram_seq, ngrams):
     for ngram in ngram_seq:
         if ngram in ngrams:
