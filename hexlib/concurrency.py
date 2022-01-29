@@ -34,7 +34,7 @@ class StatelessStreamWorker:
 
 
 class StatelessStreamProcessor:
-    def __init__(self, worker_factory, chunk_size=128, processes=1):
+    def __init__(self, worker_factory, chunk_size=128, processes=1, timeout=60):
         self._chunk_size = 128
         self._queue = MPQueue(maxsize=chunk_size)
         self._queue_out = MPQueue(maxsize=processes * 2)
@@ -42,6 +42,7 @@ class StatelessStreamProcessor:
         self._processes = []
         self._factory = worker_factory
         self._workers = []
+        self._timeout = timeout
 
         if processes > 1:
             for _ in range(processes):
@@ -67,7 +68,7 @@ class StatelessStreamProcessor:
         ingest_thread = Thread(target=self._ingest, args=(iterable,))
         ingest_thread.start()
 
-        for results in queue_iter(self._queue_out, joinable=False, timeout=10):
+        for results in queue_iter(self._queue_out, joinable=False, timeout=self._timeout):
             yield from results
 
         ingest_thread.join()
