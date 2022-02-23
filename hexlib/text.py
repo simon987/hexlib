@@ -53,13 +53,16 @@ SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", l
 DASHES = ("–", "⸺", "–", "—")
 DASHES_TRANS = str.maketrans("".join(DASHES), "".join(repeat("-", len(DASHES))))
 
-PUNCTUATION = ".,;:\"!?/()|*=>"
+SPECIAL_PUNCTUATION = ";:\"/()|*=>"
+SPECIAL_PUNCTUATION_TRANS = str.maketrans(SPECIAL_PUNCTUATION, " " * len(SPECIAL_PUNCTUATION))
+
+PUNCTUATION = ".,!?"
 PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, " " * len(PUNCTUATION))
 
 
-def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_stopwords_en=False,
-               lemmatize=False, fix_single_quotes=False, strip_quotes=False, remove_urls=False, bigrams: set = None,
-               trigrams: set = None, remove_numbers=False):
+def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_special_punctuation=False,
+               remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
+               remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False):
     if lowercase:
         text = text.lower()
 
@@ -84,6 +87,9 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
 
     if remove_punctuation:
         text = text.translate(PUNCTUATION_TRANS)
+
+    if remove_special_punctuation:
+        text = text.translate(SPECIAL_PUNCTUATION_TRANS)
 
     words = text.split()
 
