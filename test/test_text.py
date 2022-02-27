@@ -152,7 +152,7 @@ class TestText(TestCase):
             remove_stopwords_en=True,
             remove_urls=True
         )
-        expected = "hello world"
+        expected = "hello world |"
 
         self.assertEqual(" ".join(cleaned), expected)
 
@@ -170,7 +170,7 @@ class TestText(TestCase):
             remove_urls=False
         )
 
-        expected = "217709510 is there a servant that is against civilization and humanity literally instant summon"
+        expected = ">>217709510 is there a servant that is against civilization and humanity literally instant summon"
         self.assertEqual(" ".join(cleaned), expected)
 
     def test_html_entity(self):
@@ -255,5 +255,15 @@ class TestText(TestCase):
             strip_quotes=True
         )
         expected = "hi test hello"
+
+        self.assertEqual(" ".join(cleaned), expected)
+
+    def test_strip_dashes(self):
+        text = "yes -But something-something -- hello aa--bb"
+        cleaned = preprocess(
+            text,
+            strip_dashes=True
+        )
+        expected = "yes But something-something hello aa-bb"
 
         self.assertEqual(" ".join(cleaned), expected)

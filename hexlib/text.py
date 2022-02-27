@@ -1,3 +1,4 @@
+import re
 from functools import partial
 from itertools import chain, repeat
 from multiprocessing.pool import Pool
@@ -53,6 +54,8 @@ SINGLE_QUOTE_TRANS = str.maketrans("".join(SINGLE_QUOTES), "".join(repeat("'", l
 DASHES = ("–", "⸺", "–", "—")
 DASHES_TRANS = str.maketrans("".join(DASHES), "".join(repeat("-", len(DASHES))))
 
+DASHES_RE = re.compile(r"-+")
+
 SPECIAL_PUNCTUATION = ";:\"/()|*=>"
 SPECIAL_PUNCTUATION_TRANS = str.maketrans(SPECIAL_PUNCTUATION, " " * len(SPECIAL_PUNCTUATION))
 
@@ -62,6 +65,7 @@ PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, " " * len(PUNCTUATION))
 
 def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_special_punctuation=False,
                remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
+               strip_dashes=False,
                remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False):
     if lowercase:
         text = text.lower()
@@ -70,6 +74,9 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
         text = text.translate(SINGLE_QUOTE_TRANS)
 
     text = text.translate(DASHES_TRANS)
+
+    if strip_dashes:
+        text = DASHES_RE.sub("-", text)
 
     if remove_urls:
         text = LINK_RE.sub(" ", text)
@@ -95,6 +102,9 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
 
     if strip_quotes:
         words = map(lambda w: w.strip("\"'“”"), words)
+
+    if strip_dashes:
+        words = map(lambda w: w.strip("-"), words)
 
     if bigrams:
         words = _transform_bigram(nltk.bigrams(chain(words, ("*",))), bigrams)
