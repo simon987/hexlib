@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hexlib",
-    version="1.77",
+    version="1.78",
     description="Misc utility methods",
     author="simon987",
     author_email="me@simon987.net",
@@ -12,9 +12,9 @@ setup(
         "data/*"
     ]},
     install_requires=[
-        "ImageHash", "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
+        "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
         "u-msgpack-python", "psycopg2-binary", "bs4", "lxml", "nltk", "numpy",
-        "matplotlib", "scikit-learn", "fake-useragent @ git+https://github.com/Jordan9675/fake-useragent",
+        "matplotlib", "fake-useragent @ git+https://github.com/Jordan9675/fake-useragent",
         "requests"
     ]
 )
