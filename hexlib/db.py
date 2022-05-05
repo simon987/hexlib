@@ -9,20 +9,6 @@ from psycopg2.errorcodes import UNIQUE_VIOLATION
 from hexlib.env import get_redis
 
 
-class PersistentState:
-    """Quick and dirty persistent dict-like SQLite wrapper"""
-
-    def __init__(self, dbfile="state.db", logger=None, **dbargs):
-        self.dbfile = dbfile
-        self.logger = logger
-        if dbargs is None:
-            dbargs = {"timeout": 30000}
-        self.dbargs = dbargs
-
-    def __getitem__(self, table):
-        return Table(self, table)
-
-
 class VolatileState:
     """Quick and dirty volatile dict-like redis wrapper"""
 
@@ -226,6 +212,21 @@ def _deserialize(value, col_type):
     if col_type == "blob":
         return base64.b64decode(value)
     return value
+
+
+class PersistentState:
+    """Quick and dirty persistent dict-like SQLite wrapper"""
+
+    def __init__(self, dbfile="state.db", logger=None, table_factory=Table, **dbargs):
+        self.dbfile = dbfile
+        self.logger = logger
+        if dbargs is None:
+            dbargs = {"timeout": 30000}
+        self.dbargs = dbargs
+        self._table_factory = table_factory
+
+    def __getitem__(self, table):
+        return self._table_factory(self, table)
 
 
 def pg_fetch_cursor_all(cur, name, batch_size=1000):
