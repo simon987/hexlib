@@ -118,9 +118,13 @@ class Table:
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row
             try:
+                col_types = conn.execute("PRAGMA table_info(%s)" % self._table).fetchall()
                 cur = conn.execute("SELECT * FROM %s %s" % (self._table, where_clause), params)
                 for row in cur:
-                    yield dict(row)
+                    yield dict(
+                        (col[0], _deserialize(row[col[0]], col_types[i]["type"]))
+                        for i, col in enumerate(cur.description)
+                    )
             except:
                 return None
 
@@ -128,9 +132,13 @@ class Table:
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row
             try:
+                col_types = conn.execute("PRAGMA table_info(%s)" % self._table).fetchall()
                 cur = conn.execute("SELECT * FROM %s" % (self._table,))
                 for row in cur:
-                    yield dict(row)
+                    yield dict(
+                        (col[0], _deserialize(row[col[0]], col_types[i]["type"]))
+                        for i, col in enumerate(cur.description)
+                    )
             except:
                 return None
 

@@ -110,3 +110,24 @@ class TestPersistentState(TestCase):
             del s["a"][456]
         except Exception as e:
             self.fail(e)
+
+    def test_deserialize_get_set(self):
+        s = PersistentState()
+
+        s["a"][0] = {"x": b'abc'}
+
+        self.assertEqual(s["a"][0]["x"], b'abc')
+
+    def test_deserialize_sql(self):
+        s = PersistentState()
+
+        s["a"][0] = {"x": b'abc'}
+
+        self.assertEqual(list(s["a"].sql("WHERE 1=1"))[0]["x"], b'abc')
+
+    def test_deserialize_iter(self):
+        s = PersistentState()
+
+        s["a"][0] = {"x": b'abc'}
+
+        self.assertEqual(list(s["a"])[0]["x"], b'abc')
