@@ -217,7 +217,7 @@ def _serialize(value):
 
 
 def _deserialize(value, col_type):
-    if col_type == "blob":
+    if col_type.lower() == "blob":
         return base64.b64decode(value)
     return value
 
