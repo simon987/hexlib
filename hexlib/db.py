@@ -198,7 +198,7 @@ class Table:
 
     def setitem_pydantic(self, key, value: BaseModel):
         self.__setitem__(key, {
-            "json": value.json(encoder=_json_encoder),
+            "json": value.json(encoder=_json_encoder, indent=2),
             "__class": value.__class__.__name__,
             "__module": value.__class__.__module__,
             "__pydantic": 1
