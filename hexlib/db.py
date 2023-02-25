@@ -1,12 +1,21 @@
 import base64
 import sqlite3
 import traceback
+from datetime import datetime
 
 import psycopg2
 import umsgpack
 from psycopg2.errorcodes import UNIQUE_VIOLATION
+import json
+from pydantic import BaseModel
 
 from hexlib.env import get_redis
+
+
+def _json_encoder(x):
+    if isinstance(x, datetime):
+        return x.isoformat()
+    return x
 
 
 class VolatileState:
@@ -114,7 +123,7 @@ class Table:
         self._state = state
         self._table = table
 
-    def sql(self, where_clause, *params):
+    def _sql_dict(self, where_clause, *params):
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row
             try:
@@ -128,7 +137,14 @@ class Table:
             except:
                 return None
 
-    def __iter__(self):
+    def sql(self, where_clause, *params):
+        for row in self._sql_dict(where_clause, *params):
+            if row and "__pydantic" in row:
+                yield self._deserialize_pydantic(row)
+            else:
+                yield row
+
+    def _iter_dict(self):
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row
             try:
@@ -142,12 +158,19 @@ class Table:
             except:
                 return None
 
-    def __getitem__(self, item):
+    def __iter__(self):
+        for row in self._iter_dict():
+            if row and "__pydantic" in row:
+                yield self._deserialize_pydantic(row)
+            else:
+                yield row
+
+    def _getitem_dict(self, key):
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row
             try:
                 col_types = conn.execute("PRAGMA table_info(%s)" % self._table).fetchall()
-                cur = conn.execute("SELECT * FROM %s WHERE id=?" % (self._table,), (item,))
+                cur = conn.execute("SELECT * FROM %s WHERE id=?" % (self._table,), (key,))
 
                 row = cur.fetchone()
                 if row:
@@ -158,7 +181,31 @@ class Table:
             except:
                 return None
 
+    @staticmethod
+    def _deserialize_pydantic(row):
+        module = __import__(row["__module"])
+        cls = getattr(module, row["__class"])
+        return cls.parse_raw(row["json"])
+
+    def __getitem__(self, key):
+        row = self._getitem_dict(key)
+        if row and "__pydantic" in row:
+            return self._deserialize_pydantic(row)
+        return row
+
+    def setitem_pydantic(self, key, value: BaseModel):
+        self.__setitem__(key, {
+            "json": value.json(encoder=_json_encoder),
+            "__class": value.__class__.__name__,
+            "__module": value.__class__.__module__,
+            "__pydantic": 1
+        })
+
     def __setitem__(self, key, value):
+
+        if isinstance(value, BaseModel):
+            self.setitem_pydantic(key, value)
+            return
 
         with sqlite3.connect(self._state.dbfile, **self._state.dbargs) as conn:
             conn.row_factory = sqlite3.Row

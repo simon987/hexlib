@@ -1,16 +1,17 @@
 import re
-from functools import partial
 from itertools import chain, repeat
-from multiprocessing.pool import Pool
 
 import nltk.corpus
 from lxml import etree
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-from .regex import WHITESPACE_RE, PUNCTUATION_RE, LINK_RE, XML_ENTITY_RE
+from .regex_util import LINK_RE
 
 get_text = etree.XPath("//text()")
+
+nltk.download("stopwords", quiet=True)
+nltk.download("wordnet", quiet=True)
 
 stop_words_en = set(stopwords.words("english"))
 
@@ -19,9 +20,6 @@ extra_stop_words_en = [
 ]
 
 stop_words_en.update(extra_stop_words_en)
-
-nltk.download("stopwords", quiet=True)
-nltk.download("wordnet", quiet=True)
 
 lemmatizer = WordNetLemmatizer()
 
