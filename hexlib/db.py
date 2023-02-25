@@ -2,11 +2,11 @@ import base64
 import sqlite3
 import traceback
 from datetime import datetime
+from enum import Enum
 
 import psycopg2
 import umsgpack
 from psycopg2.errorcodes import UNIQUE_VIOLATION
-import json
 from pydantic import BaseModel
 
 from hexlib.env import get_redis
@@ -15,7 +15,10 @@ from hexlib.env import get_redis
 def _json_encoder(x):
     if isinstance(x, datetime):
         return x.isoformat()
-    return x
+    if isinstance(x, Enum):
+        return x.value
+
+    raise Exception(f"I don't know how to JSON encode {x} ({type(x)})")
 
 
 class VolatileState:

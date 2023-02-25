@@ -1,11 +1,18 @@
 import os
 from datetime import datetime
+from enum import Enum
+from typing import Optional
 from unittest import TestCase
 
 from pydantic import BaseModel
 from pydantic.types import List
 
 from hexlib.db import PersistentState
+
+
+class Status(Enum):
+    yes = "yes"
+    no = "no"
 
 
 class Point(BaseModel):
@@ -16,6 +23,7 @@ class Point(BaseModel):
 class Polygon(BaseModel):
     points: List[Point] = []
     created_date: datetime
+    status: Status = Status("yes")
 
 
 class TestPydanticTable(TestCase):
@@ -35,12 +43,13 @@ class TestPydanticTable(TestCase):
             points=[
                 Point(x=1, y=2),
                 Point(x=3, y=4),
-            ]
+            ],
         )
 
         s["a"]["1"] = val
 
         self.assertEqual(s["a"]["1"].points[0].x, 1)
+        self.assertEqual(s["a"]["1"].status, Status("yes"))
         self.assertEqual(s["a"]["1"].points[1].x, 3)
         self.assertEqual(s["a"]["1"].created_date.year, 2000)
 
