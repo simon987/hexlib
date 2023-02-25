@@ -131,3 +131,13 @@ class TestPersistentState(TestCase):
         s["a"][0] = {"x": b'abc'}
 
         self.assertEqual(list(s["a"])[0]["x"], b'abc')
+
+    def test_drop_table(self):
+        s = PersistentState()
+
+        s["a"][0] = {"x": 1}
+        s["a"][1] = {"x": 2}
+        self.assertEqual(len(list(s["a"])), 2)
+
+        del s["a"]
+        self.assertEqual(len(list(s["a"])), 0)

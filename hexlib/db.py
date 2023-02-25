@@ -283,6 +283,13 @@ class PersistentState:
     def __getitem__(self, table):
         return self._table_factory(self, table)
 
+    def __delitem__(self, key):
+        with sqlite3.connect(self.dbfile, **self.dbargs) as conn:
+            try:
+                conn.execute(f"DROP TABLE {key}")
+            except:
+                pass
+
 
 def pg_fetch_cursor_all(cur, name, batch_size=1000):
     while True:
