@@ -278,7 +278,7 @@ class PersistentState:
     def __init__(self, dbfile="state.db", logger=None, table_factory=Table, **dbargs):
         self.dbfile = dbfile
         self.logger = logger
-        if dbargs is None:
+        if dbargs is None or dbargs == {}:
             dbargs = {"timeout": 30000}
         self.dbargs = dbargs
         self._table_factory = table_factory
