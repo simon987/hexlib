@@ -316,10 +316,10 @@ class PgConn:
     def __init__(self, logger=None, **kwargs):
         self._conn_args = kwargs
         self.conn = psycopg2.connect(**kwargs)
-        self.cur = self.conn.cursor()
         self._logger = logger
 
     def __enter__(self):
+        self.cur = self.conn.cursor()
         return self
 
     def exec(self, query_string, args=None):
