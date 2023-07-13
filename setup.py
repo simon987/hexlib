@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hexlib",
-    version="1.87",
+    version="1.88",
     description="Misc utility methods",
     author="simon987",
     author_email="me@simon987.net",
@@ -15,6 +15,6 @@ setup(
         "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
         "u-msgpack-python", "psycopg2-binary", "bs4", "lxml", "nltk", "numpy",
         "matplotlib", "fake-useragent @ git+https://github.com/Jordan9675/fake-useragent",
-        "requests"
+        "requests", "pydantic==1.10.11"
     ]
 )
