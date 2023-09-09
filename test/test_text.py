@@ -267,3 +267,13 @@ class TestText(TestCase):
         expected = "yes But something-something hello aa-bb"
 
         self.assertEqual(" ".join(cleaned), expected)
+
+    def test_word_tokenize(self):
+        text = "i cannot believe'"
+        cleaned = preprocess(
+            text,
+            use_nltk_tokenizer=True
+        )
+        expected = "i can not believe '"
+
+        self.assertEqual(" ".join(cleaned), expected)

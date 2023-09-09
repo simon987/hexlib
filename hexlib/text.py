@@ -3,6 +3,7 @@ from itertools import chain, repeat
 
 import nltk.corpus
 from lxml import etree
+from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
@@ -12,6 +13,7 @@ get_text = etree.XPath("//text()")
 
 nltk.download("stopwords", quiet=True)
 nltk.download("wordnet", quiet=True)
+nltk.download("punkt", quiet=True)
 
 stop_words_en = set(stopwords.words("english"))
 
@@ -64,7 +66,8 @@ PUNCTUATION_TRANS = str.maketrans(PUNCTUATION, " " * len(PUNCTUATION))
 def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False, remove_special_punctuation=False,
                remove_stopwords_en=False, lemmatize=False, fix_single_quotes=False, strip_quotes=False,
                strip_dashes=False,
-               remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False):
+               remove_urls=False, bigrams: set = None, trigrams: set = None, remove_numbers=False,
+               use_nltk_tokenizer=False):
     if lowercase:
         text = text.lower()
 
@@ -96,7 +99,10 @@ def preprocess(text, lowercase=False, clean_html=False, remove_punctuation=False
     if remove_special_punctuation:
         text = text.translate(SPECIAL_PUNCTUATION_TRANS)
 
-    words = text.split()
+    if use_nltk_tokenizer:
+        words = word_tokenize(text, language="english")
+    else:
+        words = text.split()
 
     if strip_quotes:
         words = map(lambda w: w.strip("\"'“”"), words)
