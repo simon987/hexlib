@@ -15,6 +15,6 @@ setup(
         "influxdb", "siphash", "python-dateutil", "redis", "orjson", "zstandard",
         "u-msgpack-python", "psycopg2-binary", "bs4", "lxml", "nltk", "numpy",
         "matplotlib", "fake-useragent @ git+https://github.com/Jordan9675/fake-useragent",
-        "requests", "pydantic==1.10.11"
+        "requests", "pydantic==1.10.13"
     ]
 )
